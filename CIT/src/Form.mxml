@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNbuscaformulario" xmlns:ns1="*" initialize="inicio()">
+	
+	
+<mx:RemoteObject id="FormBase" destination="amfphp" source="php.Formulario" fault="FalhaObRemot(event)">
+		<mx:method name="form" result="formulario(event)" fault="FalhaMet(event)" />
+		<mx:method name="formTitulo" result="formularioTitulo(event)" fault="FalhaMet(event)" />		
+		</mx:RemoteObject>
+		
+
+	
+	
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.events.DropdownEvent;
+			
+			[Bindable]
+			public var resulBdados:String;
+			[Bindable]
+			public var ar:Array;
+			[Bindable]
+			public var IDpaciente:int;
+			[Bindable]
+			public var Observacao:String;
+			[Bindable]
+			public var UsuarioLogin:String;
+			[Bindable]
+			public var cadOUBusc:Boolean;
+
+			
+		protected function FalhaMet(e:FaultEvent):void{// função para falha de metodo
+		
+				Alert.show(e.message.toString());
+		}
+		protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+		}
+			
+		private function  inicio():void{
+				limpaForm();
+				ar= resulBdados.split(",");
+				FormBase.formTitulo(ar[0]);
+				FormBase.form(ar[0]);
+			
+				//Alert.show(ar[0]);
+		}
+		
+		protected function limpaForm():void{
+			TXAformCIT.text="";
+			LBNomebase.text="";
+		}
+		
+		protected function formularioTitulo(et:ResultEvent):void{
+			var st:String= et.result.toString();
+			LBNomebase.text = st;
+		}
+			
+		protected function formulario(e:ResultEvent):void{
+			var s:String= e.result.toString();
+			TXAformCIT.htmlText=s;
+		}
+	
+        protected function BTproximo():void{
+        	
+        	removeAllChildren();
+			var tela:LocalExposicao= new LocalExposicao();
+			tela.IDpaciente=IDpaciente;
+			tela.cadOUBusc=cadOUBusc;
+			tela.ObservacaoS=Observacao;
+			tela.UsuarioLogin=UsuarioLogin;
+			addChild(tela as DisplayObject);
+        }    
+            
+				
+				]]>
+	</mx:Script>	
+	
+	
+	
+	
+	
+	<mx:Panel width="96%" height="90%" layout="absolute" horizontalCenter="0" verticalCenter="0" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNformCIT" title="Formulario" fontFamily="Times New Roman" fontSize="16">
+
+		<mx:TextArea id="TXAformCIT" editable="false" top="50" left="10" right="10" bottom="200"/>
+		<ns1:ButtonEnter label="Próximo" fontWeight="bold" id="BTnext" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" horizontalCenter="0" fontFamily="Times New Roman" fontSize="16" width="121" height="29" click="BTproximo()" bottom="80"/>
+		<mx:Label width="50%" left="23" top="4" id="LBNomebase" text="Título"/>
+	</mx:Panel>
+	
+</mx:Canvas>

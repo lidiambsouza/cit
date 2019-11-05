@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNajuda" xmlns:ns1="*">
+			
+	
+	<mx:Panel width="522" height="340" layout="absolute" horizontalCenter="0" verticalCenter="0" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNajuda">
+		<mx:Label text="Entre em contato com o setor de informatica:" horizontalCenter="-17" y="38" fontFamily="Times New Roman" fontWeight="bold" fontSize="18" fontStyle="italic" width="448" id="LBintro" color="#186494"/>
+		<mx:Label y="102" text="Ramal:   6747/6686" horizontalCenter="0" fontFamily="Times New Roman" fontSize="16" id="LBramal" color="#186494"/>
+		<mx:Label y="128" text="Email:  cpdhujbb@ufpa.br" horizontalCenter="0" fontFamily="Times New Roman" fontSize="16" id="LBemail" color="#186494"/>
+		<mx:Label y="154" text="Spark:" horizontalCenter="-72" fontFamily="Times New Roman" fontSize="16" id="LBspark" color="#186494"/>
+		<mx:Label y="154" text="Bruce Leite: bruce.leite" horizontalCenter="27" fontFamily="Times New Roman" fontSize="16" id="LBsbruce" color="#186494"/>
+		<mx:Label y="175" text="Tonny Miralha: tonny" horizontalCenter="27" fontFamily="Times New Roman" fontSize="16" id="LBstonny" color="#186494"/>
+		<mx:LinkButton y="226" label="Manual" id="LKBmanual" horizontalCenter="0"  fontFamily="Times New Roman" fontSize="16">
+			<mx:click>navigateToURL(new URLRequest("../pdf/manual.pdf"),"download");</mx:click>
+		</mx:LinkButton>
+		
+	</mx:Panel>
+	
+</mx:Canvas>
+
+
+
+

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNsobre" xmlns:ns1="*">
+			
+	
+	<mx:Panel width="522" height="340" layout="absolute" horizontalCenter="0" verticalCenter="0" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNajuda" fontFamily="Times New Roman" fontSize="16">
+		<mx:Label text="Sistema desenvolvido por:" horizontalCenter="0" y="40" fontFamily="Times New Roman" fontWeight="bold" fontSize="18" fontStyle="italic" width="468" id="LBinfor" textAlign="center" color="#186494"/>
+		<mx:Label y="80" text="Hospital Universitário João de Barros Barreto" horizontalCenter="0" fontFamily="Times New Roman" fontSize="16" id="LBinstituicao" color="#186494"/>
+		<mx:Label y="105" text="Setor de Informática" horizontalCenter="0" fontFamily="Times New Roman" fontSize="16" id="LBsetor" color="#186494"/>
+		<mx:Label y="127" text="Lídia Maria Beirão de Souza" horizontalCenter="-1" fontFamily="Times New Roman" fontSize="16" id="LBnome" color="#186494"/>
+		<mx:Label x="233" y="156" text=" ©2015" fontFamily="Times New Roman" fontSize="16" id="LBano" color="#186494"/>
+		
+	</mx:Panel>
+	
+</mx:Canvas>
+

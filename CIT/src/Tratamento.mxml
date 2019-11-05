@@ -1,0 +1,625 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNtratamento" xmlns:ns1="*" initialize="inicio()" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	
+<mx:RemoteObject id="cadtrat" destination="amfphp" source="php.CadastroTratamento" fault="FalhaObRemot(event)">
+		<mx:method name="InsertBancoT" result="InsertBancoT(event)" fault="FalhaMet(event)" />
+		<mx:method name="UpdateBancoT" result="UpdateBancoT(event)" fault="FalhaMet(event)" />
+		<mx:method name="SelectBancoTexto" result="SelectBancoTexto(event)" fault="FalhaMet(event)" />					
+		</mx:RemoteObject>
+		
+<mx:RemoteObject id="consultpaci" destination="amfphp" source="php.ConsultarPaciente" fault="FalhaObRemot(event)">				
+		<mx:method name="SelectBancoTI" result="SelectBancoTI(event)" fault="FalhaMet(event)" />
+		<mx:method name="SelectBancoTP" result="SelectBancoTP(event)" fault="FalhaMet(event)" />
+		<mx:method name="SelectBancoTR" result="SelectBancoTR(event)" fault="FalhaMet(event)" />
+		<mx:method name="SelectExist" result="SelectExist(event)" fault="FalhaMet(event)" />		
+		</mx:RemoteObject>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.events.ItemClickEvent;
+			
+			[Bindable]
+			public var cadOUBusc:Boolean;
+			[Bindable]
+			public var Observacao:String;
+			
+			[Bindable]
+			public var UsuarioLogin:String;
+			
+			[Bindable]
+			public var IDpaciente:int;
+			[Bindable]
+			public var Volta:Boolean;
+			
+			public var nenhumS:String;			
+			public var obsclinS:String;
+			public var tratsuporteS:String;
+			public var desconcutmucoS:String;
+			public var desconocularS:String;
+			public var diluicaoS:String;
+			public var intcirurS:String;
+			public var demulcentesS:String;
+			public var neutraS:String;
+			public var emeseS:String;
+			public var lavgastS:String;
+			public var lavinstS:String;
+			public var carvatvS:String;
+			public var ignoradoS:String;
+			public var catarticosS:String;
+			public var diurforcS:String;
+			public var hemodiaS:String;
+			public var hemodperS:String;
+			public var exstransS:String;
+			public var retendoscS:String;
+			
+			public var antidotoS:String;
+			public var soroS:String;
+			public var tratsintomS:String;
+			public var outroS:String;
+			
+			
+		protected function FalhaMet(e:FaultEvent):void{// função para falha de metodo
+		
+				Alert.show(e.message.toString());
+		}
+		protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+		}
+			
+			
+		private function  inicio():void{
+				limpaForm();
+			consultpaci.SelectExist(IDpaciente,"tratamento");
+		}
+		protected function SelectExist(evt:ResultEvent):void{
+			if(evt.result.toString()=="true"){
+					consultpaci.SelectBancoTI(IDpaciente);
+					consultpaci.SelectBancoTP(IDpaciente);
+					consultpaci.SelectBancoTR(IDpaciente);
+					cadtrat.SelectBancoTexto(IDpaciente);
+				Volta=true;
+			}else{
+				Volta=false;
+			}
+		}
+		
+		
+		protected function limpaForm():void{
+			//TIbuscanomeS.text="";
+		}
+		protected function UpdateBancoT(evt:ResultEvent):void{
+			if(evt.result.toString()=="false"){
+				Alert.show("Erro! Dados não cadastrados!");
+				
+			}else{
+				proximoTela();
+			}
+			
+		}
+		
+		protected function InsertBancoT(evt:ResultEvent):void{
+			//Alert.show(evt.result.toString());
+			if(evt.result.toString()=="false"){
+				Alert.show("Erro! Dados não cadastrados!");
+				
+			}else{
+				//IDpacientBanco=parseInt(evt.result.toString());
+				//Alert.show(IDpacientBanco.toString());
+				proximoTela();
+			}
+			
+		}
+		protected function proximoTela():void{
+			removeAllChildren();
+			var tela:Resumo = new Resumo();
+			tela.IDpaciente=IDpaciente;
+			tela.cadOUBusc=cadOUBusc;
+			tela.UsuarioLogin=UsuarioLogin;
+			//tela.Observacao=Observacao;
+			addChild(tela as DisplayObject);
+		}
+		protected function SelectBancoTexto(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				var arTexto:Array= s.split(",");
+				
+				TIantidoto.text=arTexto[2];
+				TIoutro.text=arTexto[3];
+				TIsoro.text=arTexto[4];
+				TItratsintomatico.text=arTexto[5];			
+		}
+		
+		protected function SelectBancoTI(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				var arTI:Array= s.split(",");
+				var arTIR:Array=new Array();
+				var i:int;
+				for(i=0;i<arTI.length;i++){					
+					selecionaTratamento(arTI[i],"Tratamento inicial");
+					//var myBTI: RadioButtonGroup= new RadioButtonGroup;
+					//myBTI.id=arTI[i];
+									
+				}				
+		}
+			
+		protected function SelectBancoTP(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				var arTP:Array= s.split(",");
+				var arTPR:Array=new Array();
+				var i:int;
+				for(i=0;i<arTP.length;i++){
+					selecionaTratamento(arTP[i],"Tratamento proposto");													
+				}			
+		}
+			
+		protected function SelectBancoTR(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				var arTR:Array= s.split(",");
+				var arTRR:Array=new Array();
+				var i:int;
+				for(i=0;i<arTR.length;i++){
+					selecionaTratamento(arTR[i],"Tratamento realizado");													
+				}			
+		}
+			
+		
+		protected function selecionaTratamento(gp:String,trat:String):void{
+			//fazer um switch pegar o gp. e add variavel global = trat
+			
+			switch(gp){
+				case "nenhum":
+                       nenhumS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,nenhum);
+                       
+                	break;
+                case "obsclin":
+                       obsclinS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,obsclin);
+                       
+                    break;
+                case "tratsuporte":
+                       tratsuporteS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,tratsuporte);
+                      
+                break;
+                case "desconcutmuco":
+                       desconcutmucoS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,desconcutmuco);
+                       
+                break;
+                case "desconocular":
+                       desconocularS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,desconocular);
+                      
+                break;
+                case "diluicao":
+                       diluicaoS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,diluicao);
+                       
+                break;
+                case "intcirur":
+                       intcirurS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,intcirur);
+                       
+                break;
+                case "demulcentes":
+                       demulcentesS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,demulcentes);
+                       
+                break;
+                case "neutra":
+                       neutraS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,neutra);
+                       
+                break;
+                case "emese":
+                       emeseS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,emese);
+                       
+                break;
+                case "lavgast":
+                       lavgastS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,lavgast);
+                       
+                break;
+                case "lavinst":
+                       lavinstS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,lavinst);
+                       
+                break;
+                case "carvatv":
+                       carvatvS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,carvatv);
+                       
+                break;
+                case "ignorado":
+                       ignoradoS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,ignorado);
+                      
+                break;
+                case "catarticos":
+                       catarticosS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,catarticos);
+                       
+                break;
+                case "diurforc":
+                       diurforcS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,diurforc);
+                      
+                break;
+                case "hemodia":
+                       hemodiaS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,hemodia);
+                      
+                break;
+                case "hemodper":
+                       hemodperS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,hemodper);
+                       
+                break;
+                case "exstrans":
+                       exstransS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,exstrans);
+                       
+                break;
+                case "retendosc":
+                       retendoscS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,retendosc);
+                      
+                break;
+                
+                case "antidoto":
+                       antidotoS=trat;
+                       TIantidoto.editable=true;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,antidoto);                       
+                       
+                       //TIantidoto.text="";
+                      // TIoutro.text="";
+                       //TIsoro.text="";
+                      // TItratsintomatico.text="";
+                break;
+                case "soro":
+                       soroS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=true;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,soro);                       
+                       
+                      // TIantidoto.text="";
+                      // TIoutro.text="";
+                      // TIsoro.text="";
+                      // TItratsintomatico.text="";
+                break;
+                case "tratsintom":
+                       tratsintomS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=false;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=true;
+                       tipoTratamento(trat,tratsintom);
+                       
+                      // TIantidoto.text="";
+                      // TIoutro.text="";
+                      // TIsoro.text="";
+                      // TItratsintomatico.text="";
+                break;
+                case "outro":
+                       outroS=trat;
+                       TIantidoto.editable=false;
+                       TIoutro.editable=true;
+                       TIsoro.editable=false;
+                       TItratsintomatico.editable=false;
+                       tipoTratamento(trat,outro);
+                       
+                     //  TIantidoto.text="";
+                      // TIoutro.text="";
+                     //  TIsoro.text="";
+                     //  TItratsintomatico.text="";
+                break;
+                
+            }
+			
+		}
+		protected function tipoTratamento(op:String, gp:RadioButtonGroup):void{
+			switch(op){
+			case"Tratamento inicial":
+				var myRB:RadioButton = gp.getRadioButtonAt(0);
+				myRB.selected=true;
+			break;
+			
+			case"Tratamento proposto":
+				var myRB2:RadioButton = gp.getRadioButtonAt(1);
+				myRB2.selected=true;
+			break;
+			
+			case"Tratamento realizado":
+				var myRB3:RadioButton = gp.getRadioButtonAt(2);
+				myRB3.selected=true; 
+			break;
+
+			}
+		}
+		
+		protected function opcao(evt:ItemClickEvent):void {
+                switch (evt.currentTarget.selectedValue) {
+                    case "a":
+                        //Alert.show("inicial");
+                        var grupoA:String=evt.currentTarget.selection.groupName;
+                       selecionaTratamento(grupoA,"Tratamento inicial");
+                        break;
+                    case "b":
+                       // Alert.show("proposto");
+                        var grupoB:String=evt.currentTarget.selection.groupName;
+                       selecionaTratamento(grupoB,"Tratamento proposto");
+                        break;
+                    case "c":
+                       // Alert.show("realizado");
+                        var grupoC:String=evt.currentTarget.selection.groupName;
+                        selecionaTratamento(grupoC,"Tratamento realizado");
+                        break;
+                     default:
+                     	var grupoD:String=evt.currentTarget.selection.groupName;
+                        selecionaTratamento(grupoD,"");
+                        break;
+                }
+        }
+        protected function BTproximo():void{
+        	if(Volta){
+        		cadtrat.UpdateBancoT(IDpaciente,nenhumS,obsclinS,tratsuporteS,
+        		desconcutmucoS,desconocularS,diluicaoS,intcirurS,demulcentesS,
+        		neutraS,emeseS,lavgastS,lavinstS,carvatvS,ignoradoS,catarticosS,
+        		diurforcS,hemodiaS,hemodperS,exstransS,retendoscS,antidotoS,soroS,tratsintomS,outroS,
+        		TIantidoto.text,TIoutro.text,TIsoro.text,TItratsintomatico.text);
+        	}else{
+        		cadtrat.InsertBancoT(IDpaciente,nenhumS,obsclinS,tratsuporteS,
+        		desconcutmucoS,desconocularS,diluicaoS,intcirurS,demulcentesS,
+        		neutraS,emeseS,lavgastS,lavinstS,carvatvS,ignoradoS,catarticosS,
+        		diurforcS,hemodiaS,hemodperS,exstransS,retendoscS,antidotoS,soroS,tratsintomS,outroS,
+        		TIantidoto.text,TIoutro.text,TIsoro.text,TItratsintomatico.text);
+        	}
+        }
+        protected function BTvoltar():void{
+			removeAllChildren();
+			var tela:AgenteToxico =new AgenteToxico();			
+			tela.IDpaciente=IDpaciente;
+			tela.cadOUBusc=cadOUBusc;
+			tela.UsuarioLogin=UsuarioLogin;
+			//tela.Observacao=Observacao;
+			tela.Volta=true;
+			addChild(tela as DisplayObject);
+		}
+        
+            
+            
+				
+				]]>
+	</mx:Script>	
+	
+	
+	
+<mx:Panel horizontalScrollPolicy="auto" verticalScrollPolicy="auto" id="PNmain" horizontalCenter="0" verticalCenter="0" width="96%" height="90%" layout="absolute">	
+	
+	<mx:Panel width="1300" height="690" layout="absolute" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNtratamento" title="Tratamento" fontFamily="Times New Roman" fontSize="16" left="0" top="0">
+		<mx:RadioButtonGroup id="nenhum" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="obsclin" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="tratsuporte" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="desconcutmuco" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="desconocular" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="diluicao" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="intcirur" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="demulcentes" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="neutra" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="emese" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="lavgast" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="lavinst" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="carvatv" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="ignorado" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="catarticos" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="diurforc" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="hemodia" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="hemodper" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="exstrans" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="retendosc" itemClick="opcao(event);"/>
+		
+		<mx:RadioButtonGroup id="antidoto" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="soro" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="tratsintom" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="outro" itemClick="opcao(event);"/>
+		
+		<mx:RadioButton label="a" groupName="nenhum" top="40" left="100" id="RBa" value="a"/>
+		<mx:RadioButton label="b" groupName="nenhum" top="40" left="150" id="RBb" value="b"/>
+		<mx:RadioButton label="c" groupName="nenhum" top="40" left="200" id="RBc" value="c"/>
+		<mx:Label text="A- Tratamento inicial" id="LBtratinicial" fontFamily="Times New Roman" fontSize="16" width="203" height="25" top="10" left="10"/>
+		<mx:Label text="Nenhum" id="LBNenhum" fontFamily="Times New Roman" fontSize="16" width="73" height="25" top="40" left="10"/>
+		<mx:RadioButton label="a" groupName="obsclin" top="70" left="150" id="RBa0" value="a"/>
+		<mx:RadioButton label="b" groupName="obsclin" top="70" left="200" id="RBb0" value="b"/>
+		<mx:RadioButton label="c" groupName="obsclin" top="70" left="250" id="RBc0" value="c"/>
+		<mx:Label text="Observação clínica" id="LBobsclin" fontFamily="Times New Roman" fontSize="16" width="122" height="25" top="70" left="10"/>
+		<mx:RadioButton label="a" groupName="tratsuporte" top="100" left="150" id="RBa1" value="a"/>
+		<mx:RadioButton label="b" groupName="tratsuporte" top="100" left="200" id="RBb1" value="b"/>
+		<mx:RadioButton label="c" groupName="tratsuporte" top="100" left="250" id="RBc1" value="c"/>
+		<mx:Label text="Tratamento suporte" id="LBtratsuporte" fontFamily="Times New Roman" fontSize="16" width="132" height="25" top="100" left="10"/>
+		<mx:RadioButton label="a" groupName="desconcutmuco" top="130" left="250" id="RBa2" value="a"/>
+		<mx:RadioButton label="b" groupName="desconcutmuco" top="130" left="300" id="RBb2" value="b"/>
+		<mx:RadioButton label="c" groupName="desconcutmuco" top="130" left="350" id="RBc2" value="c"/>
+		<mx:Label text="Descontaminação cutânea/mucosa" id="LBdesconcutmuco" fontFamily="Times New Roman" fontSize="16" height="25" top="130" left="10" width="223"/>
+		<mx:RadioButton label="a" groupName="demulcentes" top="40" id="RBa3" value="a" horizontalCenter="85"/>
+		<mx:RadioButton label="a" groupName="catarticos" top="40" id="RBa11" value="a" right="100"/>
+		<mx:RadioButton label="a" groupName="diurforc" top="70" id="RBa12" value="a" right="100"/>
+		<mx:RadioButton label="a" groupName="hemodia" top="100" id="RBa13" value="a" right="100"/>
+		<mx:RadioButton label="a" groupName="hemodper" top="130" id="RBa14" value="a" right="100"/>
+		<mx:RadioButton label="a" groupName="exstrans" top="160" id="RBa15" value="a" right="100"/>
+		<mx:RadioButton label="a" groupName="retendosc" top="190" id="RBa16" value="a" right="100"/>
+		<mx:RadioButton label="b" groupName="demulcentes" top="40" id="RBb3" value="b" horizontalCenter="135"/>
+		<mx:RadioButton label="b" groupName="catarticos" top="40" id="RBb11" value="b" right="50"/>
+		<mx:RadioButton label="b" groupName="diurforc" top="70" id="RBb12" value="b" right="50"/>
+		<mx:RadioButton label="b" groupName="hemodia" top="100" id="RBb13" value="b" right="50"/>
+		<mx:RadioButton label="b" groupName="hemodper" top="130" id="RBb14" value="b" right="50"/>
+		<mx:RadioButton label="b" groupName="exstrans" top="160" id="RBb15" value="b" right="50"/>
+		<mx:RadioButton label="b" groupName="retendosc" top="190" id="RBb16" value="b" right="50"/>
+		<mx:Label text="Demulcentes" id="LBdemulcentes" fontFamily="Times New Roman" fontSize="16" height="25" top="40" width="172" horizontalCenter="-35"/>
+		<mx:Label text="Catárticos" id="LBcatarticos" fontFamily="Times New Roman" fontSize="16" height="25" top="40" width="172" right="150"/>
+		<mx:Label text="Hemodiálise" id="LBhemodia" fontFamily="Times New Roman" fontSize="16" height="25" top="100" width="172" right="150"/>
+		<mx:Label text="Hemoperfusão" id="LBhemodper" fontFamily="Times New Roman" fontSize="16" height="25" top="130" width="172" right="150"/>
+		<mx:Label text="Exsanguíneo transfusão" id="LBexstrans" fontFamily="Times New Roman" fontSize="16" height="25" top="160" width="172" right="150"/>
+		<mx:Label text="Retirada endoscópica" id="LBretendosc" fontFamily="Times New Roman" fontSize="16" height="25" top="190" width="172" right="150"/>
+		<mx:Label text="Diurese forçada" id="LBdiurforc" fontFamily="Times New Roman" fontSize="16" height="25" top="70" width="172" right="150"/>
+		<mx:RadioButton label="a" groupName="neutra" top="70" id="RBa4" value="a" horizontalCenter="85"/>
+		<mx:RadioButton label="b" groupName="neutra" top="70" id="RBb4" value="b" horizontalCenter="135"/>
+		<mx:Label text="Interveção cirúrgica" id="LBintcirur" fontFamily="Times New Roman" fontSize="16" height="25" top="220" width="172" left="10"/>
+		<mx:RadioButton label="a" groupName="emese" top="100" id="RBa5" value="a" horizontalCenter="85"/>
+		<mx:RadioButton label="b" groupName="emese" top="100" id="RBb5" value="b" horizontalCenter="135"/>
+		<mx:Label text="Emese" id="LBemese" fontFamily="Times New Roman" fontSize="16" height="25" top="100" width="172" horizontalCenter="-35"/>
+		<mx:RadioButton label="a" groupName="lavgast" top="130" id="RBa6" value="a" horizontalCenter="85"/>
+		<mx:RadioButton label="b" groupName="lavgast" top="130" id="RBb6" value="b" horizontalCenter="135"/>
+		<mx:Label text="Lavagem gástrica" id="LBlavgast" fontFamily="Times New Roman" fontSize="16" height="25" top="130" width="172" horizontalCenter="-35"/>
+		<mx:RadioButton label="a" groupName="lavinst" top="160" id="RBa7" value="a" horizontalCenter="85"/>
+		<mx:RadioButton label="b" groupName="lavinst" top="160" id="RBb7" value="b" horizontalCenter="135"/>
+		<mx:RadioButton label="c" groupName="demulcentes" top="40" id="RBc8" value="c" horizontalCenter="175"/>
+		<mx:RadioButton label="c" groupName="neutra" top="70" id="RBc9" value="c" horizontalCenter="175"/>
+		<mx:RadioButton label="c" groupName="emese" top="100" id="RBc10" value="c" horizontalCenter="175"/>
+		<mx:RadioButton label="c" groupName="lavgast" top="130" id="RBc11" value="c" horizontalCenter="175"/>
+		<mx:RadioButton label="c" groupName="lavinst" top="160" id="RBc12" value="c" horizontalCenter="175"/>
+		<mx:RadioButton label="a" groupName="diluicao" top="190" id="RBa9" value="a" left="200"/>
+		<mx:RadioButton label="b" groupName="diluicao" top="190" id="RBb9" value="b" left="250"/>
+		<mx:RadioButton label="c" groupName="diluicao" top="190" id="RBc4" value="c" left="300"/>
+		<mx:RadioButton label="a" groupName="intcirur" top="220" id="RBa17" value="a" left="200"/>
+		<mx:RadioButton label="b" groupName="intcirur" top="220" id="RBb17" value="b" left="250"/>
+		<mx:RadioButton label="c" groupName="intcirur" top="220" id="RBc17" value="c" left="300"/>
+		<mx:RadioButton label="a" groupName="desconocular" top="160" id="RBa8" value="a" left="200"/>
+		<mx:RadioButton label="b" groupName="desconocular" top="160" id="RBb8" value="b" left="250"/>
+		<mx:RadioButton label="c" groupName="desconocular" top="160" id="RBc3" value="c" left="300"/>
+		<mx:Label text="Lavagem intestinal" id="LBlavinst" fontFamily="Times New Roman" fontSize="16" height="25" top="160" width="172" horizontalCenter="-35"/>
+		<mx:RadioButton label="a" groupName="carvatv" top="190" id="RBa10" value="a" horizontalCenter="85"/>
+		<mx:RadioButton label="b" groupName="carvatv" top="190" id="RBb10" value="b" horizontalCenter="135"/>
+		<mx:RadioButton label="c" groupName="carvatv" top="190" id="RBc5" value="c" horizontalCenter="175"/>
+		<mx:RadioButton label="a" groupName="ignorado" top="220" id="RBa18" value="a" horizontalCenter="85"/>
+		<mx:RadioButton label="b" groupName="ignorado" top="220" id="RBb18" value="b" horizontalCenter="135"/>
+		<mx:RadioButton label="c" groupName="ignorado" top="220" id="RBc18" value="c" horizontalCenter="175"/>
+		<mx:Label text="Ignorado" id="LBignorado" fontFamily="Times New Roman" fontSize="16" height="25" top="220" width="172" horizontalCenter="-35"/>
+		<mx:RadioButton label="c" groupName="catarticos" top="40" id="RBc6" value="c" right="10"/>
+		<mx:RadioButton label="c" groupName="diurforc" top="70" id="RBc7" value="c" right="10"/>
+		<mx:RadioButton label="c" groupName="hemodia" top="100" id="RBc13" value="c" right="10"/>
+		<mx:RadioButton label="c" groupName="hemodper" top="130" id="RBc14" value="c" right="10"/>
+		<mx:RadioButton label="c" groupName="exstrans" top="160" id="RBc15" value="c" right="10"/>
+		<mx:RadioButton label="c" groupName="retendosc" top="190" id="RBc16" value="c" right="10"/>
+		<mx:RadioButton label="a" groupName="tratsintom" top="220" id="RBa19" value="a" right="100"/>
+		<mx:RadioButton label="b" groupName="tratsintom" top="220" id="RBb19" value="b" right="50"/>
+		<mx:Label text="Tratamento sintomático" id="LBtratsintom" fontFamily="Times New Roman" fontSize="16" height="25" top="220" width="172" right="150"/>
+		<mx:RadioButton label="c" groupName="tratsintom" top="220" id="RBc19" value="c" right="10"/>
+		<mx:RadioButton label="a" groupName="soro" top="250" id="RBa20" value="a" horizontalCenter="85"/>
+		<mx:RadioButton label="b" groupName="soro" top="250" id="RBb20" value="b" horizontalCenter="135"/>
+		<mx:Label text="Soro" id="LBsoro" fontFamily="Times New Roman" fontSize="16" height="25" top="250" width="172" horizontalCenter="-35"/>
+		<mx:RadioButton label="c" groupName="soro" top="250" id="RBc20" value="c" horizontalCenter="175"/>
+		<mx:TextInput id="TIsoro" fontFamily="Times New Roman" fontSize="16" top="280" height="29" editable="false" width="312" horizontalCenter="35"/>
+		<mx:RadioButton label="a" groupName="antidoto" top="250" id="RBa21" value="a" left="200"/>
+		<mx:RadioButton label="b" groupName="antidoto" top="250" id="RBb21" value="b" left="250"/>
+		<mx:Label text="Antídoto" id="LBantidoto" fontFamily="Times New Roman" fontSize="16" height="25" top="250" width="172" left="10"/>
+		<mx:RadioButton label="c" groupName="antidoto" top="250" id="RBc21" value="c" left="300"/>
+		<mx:TextInput id="TIantidoto" fontFamily="Times New Roman" fontSize="16" top="280" height="29" editable="false" width="312" left="10"/>
+		<mx:RadioButton label="a" groupName="outro" top="315" id="RBa22" value="a" left="200"/>
+		<mx:RadioButton label="b" groupName="outro" top="315" id="RBb22" value="b" left="250"/>
+		<mx:Label text="Outro" id="LBoutro" fontFamily="Times New Roman" fontSize="16" height="25" top="315" width="172" left="10"/>
+		<mx:RadioButton label="c" groupName="outro" top="315" id="RBc22" value="c" left="300"/>
+		<mx:TextInput id="TIoutro" fontFamily="Times New Roman" fontSize="16" top="350" height="29" editable="false" left="10" right="10"/>
+		<mx:Label text="Carvão ativado" id="LBcarvatv" fontFamily="Times New Roman" fontSize="16" height="25" top="190" width="172" horizontalCenter="-35"/>
+		<mx:Label text="Descontaminação ocular" id="LBdesconocular" fontFamily="Times New Roman" fontSize="16" height="25" top="160" width="172" left="10"/>
+		<mx:Label text="Diluição" id="LBdiluicao" fontFamily="Times New Roman" fontSize="16" height="25" top="190" width="172" left="10"/>
+		<mx:Label text="Neutralização" id="LBneutra" fontFamily="Times New Roman" fontSize="16" height="25" top="70" width="172" horizontalCenter="-35"/>
+		<mx:Label text="B- Tratamento proposto" id="LBtratproposto" fontFamily="Times New Roman" fontSize="16" width="165" height="25" top="10" horizontalCenter="0"/>
+		<mx:Label text="C- Tratamento realizado" id="LBtratrealizado" fontFamily="Times New Roman" fontSize="16" width="165" height="25" top="10" right="10"/>
+		<mx:TextInput id="TItratsintomatico" fontFamily="Times New Roman" fontSize="16" top="250" height="29" editable="false" right="10" width="312"/>
+		<ns1:ButtonEnter label="Próximo" fontWeight="bold" id="BTnext" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" verticalCenter="220" fontFamily="Times New Roman" fontSize="16" width="121" height="29" click="BTproximo()" right="10"/>
+		<ns1:ButtonEnter label="Voltar" fontWeight="bold" id="BTant" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" verticalCenter="220" fontFamily="Times New Roman" fontSize="16" width="121" height="29" click="BTvoltar()" left="10"/>
+	</mx:Panel>
+</mx:Panel>	
+</mx:Canvas>

@@ -1,0 +1,529 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNsobre" xmlns:ns1="*" initialize="inicio()" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	
+	<mx:RemoteObject id="consultpaci" destination="amfphp" source="php.ConsultarPaciente" fault="FalhaObRemot(event)">
+		<mx:method name="SelectBancoP" result="SelectBancoP(event)" fault="FalhaMet(event)" />
+		<mx:method name="SelectBancoS" result="SelectBancoS(event)" fault="FalhaMet(event)" />
+		<mx:method name="SelectBancoE" result="SelectBancoE(event)" fault="FalhaMet(event)" />
+		<mx:method name="SelectBancoLE" result="SelectBancoLE(event)" fault="FalhaMet(event)" />
+		<mx:method name="SelectBancoAT" result="SelectBancoAT(event)" fault="FalhaMet(event)" />
+		<mx:method name="SelectBancoATb" result="SelectBancoATb(event)" fault="FalhaMet(event)" />		
+		<mx:method name="SelectBancoTI" result="SelectBancoTI(event)" fault="FalhaMet(event)" />
+		<mx:method name="SelectBancoTP" result="SelectBancoTP(event)" fault="FalhaMet(event)" />
+		<mx:method name="SelectBancoTR" result="SelectBancoTR(event)" fault="FalhaMet(event)" />
+		<mx:method name="SelectBancoR" result="SelectBancoR(event)" fault="FalhaMet(event)" />
+		<mx:method name="SelectBancoRb" result="SelectBancoRb(event)" fault="FalhaMet(event)" />
+		<mx:method name="SelectBancoV" result="SelectBancoV(event)" fault="FalhaMet(event)" />
+		
+		
+		
+		</mx:RemoteObject>
+	
+			
+	<mx:Script>
+	<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.events.DropdownEvent;
+			import mx.printing.FlexPrintJob;
+			import mx.printing.FlexPrintJobScaleType;
+			
+		//<mx:method name="SelectBancoTP" result="SelectBancoTP(event)" fault="FalhaMet(event)" />
+		//<mx:method name="SelectBancoTR" result="SelectBancoTR(event)" fault="FalhaMet(event)" />
+			
+			[Bindable]
+			public var resulBdados:String;
+			
+			[Bindable]
+			public var ar:Array;
+			[Bindable]
+			public var strResp:String;
+			
+					
+			
+			private function  inicio():void{
+				//Alert.show(resulBdados);
+				ar= resulBdados.split(",");
+				consultpaci.SelectBancoP(ar[0]);
+				consultpaci.SelectBancoS(ar[0]);
+				consultpaci.SelectBancoE(ar[0]);
+				consultpaci.SelectBancoLE(ar[0]);
+				consultpaci.SelectBancoAT(ar[0]);
+				consultpaci.SelectBancoTI(ar[0]);
+				consultpaci.SelectBancoTP(ar[0]);
+				consultpaci.SelectBancoTR(ar[0]);
+				consultpaci.SelectBancoR(ar[0]);
+				//Alert.show(ar[4]);
+				//camposPree(ar);
+				
+			}
+			
+			protected function FalhaMet(e:FaultEvent):void// função para falha de metodo
+			{
+				Alert.show(e.message.toString());
+			}
+			protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+			}
+			
+			protected function tratamento(op:String):String{
+			
+				switch(op){
+				case "nenhum":
+                       strResp= "nenhum";
+                break;
+                case "obsclin":
+                       strResp= "Observação clínica";
+                break;
+                case "tratsuporte":
+                	   strResp= "Tratamento suporte";                       
+                break;
+                case "desconcutmuco":
+                       strResp= "Descontaminação cutânea/mucosa";
+                break;
+                case "desconocular":
+                       strResp= "Descontaminação ocular";
+                break;
+                case "diluicao":
+                       strResp= "Diluição";
+                break;
+                case "intcirur":
+                      strResp= "Interveção cirúrgica";
+                break;
+                case "demulcentes":
+                       strResp= "Demulcentes";
+                break;
+                case "neutra":
+                       strResp= "Neutralização";
+                break;
+                case "emese":
+                       strResp= "Emese";
+                break;
+                case "lavgast":
+                       strResp= "Lavagem gástrica";
+                break;
+                case "lavinst":
+                       strResp= "Lavagem intestinal";
+                break;
+                case "carvatv":
+                       strResp= "Carvão ativado";
+                break;
+                case "ignorado":
+                      strResp= "Ignorado";
+                break;
+                case "catarticos":
+                      strResp= "Catárticos";
+                break;
+                case "diurforc":
+                       strResp= "Diurese forçada";
+                break;
+                case "hemodia":
+                       strResp= "Hemodiálise";
+                break;
+                case "hemodper":
+                       strResp= "Hemoperfusão";
+                break;
+                case "exstrans":
+                       strResp= "Exsanguíneo transfusão";
+                break;
+                case "retendosc":
+                       strResp= "Retirada endoscópica";
+                break;
+                
+                case "antidoto":
+                       strResp= "Antídoto";
+                break;
+                case "soro":
+                       strResp= "Soro";
+                break;
+                case "tratsintom":
+                      strResp= "Tratamento sintomático";
+                break;
+                case "outro":
+                      strResp= "Outro";
+                break;
+                default:
+                	strResp=op;
+                break;
+            	}
+            
+				return strResp;
+			}
+			
+		
+			
+			protected function SelectBancoTI(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				var arTI:Array= s.split(",");
+				var arTIR:Array=new Array();
+				var i:int;
+				for(i=0;i<arTI.length;i++){	
+					
+					var sr:String= tratamento(arTI[i]);
+					if(sr!=""){
+						arTIR.push(sr);
+					}
+				
+				}
+				TAtratamentoIni.text=arTIR.toString();
+				
+			}
+			
+			protected function SelectBancoTP(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				var arTP:Array= s.split(",");
+				var arTPR:Array=new Array();
+				var i:int;
+				for(i=0;i<arTP.length;i++){
+					var srP:String= tratamento(arTP[i]);
+					if(srP!=""){
+						arTPR.push(srP);
+					}				
+				}
+				TAtratamentoProp.text=arTPR.toString();
+			}
+			
+			protected function SelectBancoTR(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				var arTR:Array= s.split(",");
+				var arTRR:Array=new Array();
+				var i:int;
+				for(i=0;i<arTR.length;i++){
+					var srR:String= tratamento(arTR[i]);
+					if(srR!=""){
+						arTRR.push(srR);
+					}				
+				}
+				TAtratamentoReal.text=arTRR.toString();
+			}
+			
+			protected function SelectBancoRb(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				TIdiagdefinR.text=s;
+			}
+			
+			protected function SelectBancoV(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				TAevoluObs.text=s;
+			}
+			
+			protected function SelectBancoR(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				var arR:Array= s.split(",");
+				LBmanifestacaoclinR.text=arR[2];
+				LBanalisetoxiR.text=arR[3];
+				LBinternacaoR.text=arR[4];
+				LBespecificarR.text=arR[5];
+				LBevolucaoR.text=arR[6];
+				LBevolucaoR2.text=arR[7];
+				consultpaci.SelectBancoRb(ar[0]);
+				//TIdiagdefinR.text=arR[8];
+				TIcid10R.text=arR[8];
+				LBgravidadeR.text=arR[9];
+				LBdataEvoR.text=dataformatar(arR[10]);
+				LBgpagenteR.text=arR[11];
+				consultpaci.SelectBancoV(ar[0]);
+				//TAevoluObs.text=arR[11];
+			}
+			
+			protected function SelectBancoAT(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				var arAT:Array= s.split(",");
+				consultpaci.SelectBancoATb(ar[0]);
+				
+				LBclassAT.text=arAT[2];
+				LBclassAT2.text=arAT[3];
+			}
+			protected function SelectBancoATb(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				TAagentToxico.text=s;
+			}
+			
+			protected function SelectBancoLE(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				var arLE:Array= s.split(",");
+				LBestabelecimentoR.text=arLE[2];
+				
+				if(arLE[3]==""){
+					if(arLE[4]==""){
+						LBestabelecimentoOTR.text="";
+					}else{
+						LBestabelecimentoOTR.text=arLE[4];
+					}
+				}else{
+					LBestabelecimentoOTR.text=arLE[3];
+				}
+				
+				LBLocalexposicaoR.text=arLE[6];
+				LBLocalexposicaoOTR.text=arLE[7];
+				LBzonaR.text=arLE[5];
+				LBenderecoLER.text=arLE[11];
+				LBnumeroENDRLE.text=arLE[12];
+				LBestadoRLE.text=arLE[8];
+				LBmunicipioRLE.text=arLE[9];
+				LBBairroRLE.text=arLE[10];
+				
+			}	
+				
+			protected function SelectBancoE(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				var arE:Array= s.split(",");
+				LBcircunstanciaR.text=arE[2];
+				LBcircunstanciaOTR.text=arE[3];
+				LBviaR.text=arE[4];
+				LBtipoR.text=arE[5];
+				LBtempdecoR.text=arE[6];
+				LBtempdecoR2.text=arE[7];
+				LBduraexpR.text=arE[8];
+				LBduraexpR2.text=arE[9];
+			}
+			
+			protected function SelectBancoS(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				var arS:Array= s.split(",");
+				LBnomesolicitanteR.text=arS[2];
+				LBTelefoneSDDDR.text=arS[3];
+				LBTelefoneSR.text=arS[4];
+				LBramalSR.text=arS[5];
+				LBinstituicaoR.text=arS[6];
+				LBenderecoSR.text=arS[10];
+				LBnumeroENDRS.text=arS[11];
+				LBestadoRS.text=arS[7];
+				LBmunicipioRS.text=arS[8];
+				LBBairroRS.text=arS[9];
+				LBcategoriaRS.text=arS[12];
+				if(arS[13]==""){
+					if(arS[14]==""){
+						LBcategoriaCONTRS.text="";
+					}else{
+						LBcategoriaCONTRS.text=arS[14];
+					}
+					
+				}else{
+					LBcategoriaCONTRS.text=arS[13];
+				}
+				
+				
+			}
+			
+			protected function SelectBancoP(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				var arP:Array= s.split(",");
+				LBnomepacienteR.text=arP[1];
+				LBSexoR.text=arP[2];
+				LBidadeNR.text=arP[3];
+				LBidadeTR.text=arP[4];
+				LBpesoR.text=arP[5];
+				LBTelefoneDDDR.text=arP[6];
+				LBTelefoneR.text=arP[7];
+				LBprofissaoR.text=arP[10];
+				LBgestanteR.text=arP[9];
+				LBespecieR.text=arP[8];
+				LBgestanteTempR.text=arP[11];
+				LBestadoR.text=arP[12];
+				LBmunicipioR.text=arP[13];
+				LBEnderecoR.text=arP[15];
+				LBnumeroR.text=arP[16];
+				LBvitimaR.text=arP[17];
+				LBBairroR.text=arP[14];
+				LBCentroR.text=arP[18];
+				LBnumeroUnicoR.text=arP[19];
+				LBdataR.text=dataformatar(arP[20]);
+				LBsemR.text=arP[21];
+				LBhoraIDR.text=horaformatar(arP[22]);
+				LBrespCadR.text=arP[23];
+				
+			}
+			protected function horaformatar(hr:String):String{
+			var ht:String= hr.substr(0,2)+":"+hr.substr(3,2)+":00";
+			return ht;
+			}
+			protected function dataformatar(dt:String):String{
+				var st:String=dt.substr(8,2)+"/"+dt.substr(5,2)+"/"+dt.substr(0,4);//ddmmyyyy
+				return st;
+		
+			}
+			
+			
+			protected function imprimir():void{
+				var printJob:FlexPrintJob = new FlexPrintJob();
+                if (printJob.start() != true) return;
+                	printJob.addObject(PNpacientINFO,FlexPrintJobScaleType.MATCH_WIDTH);
+                	printJob.addObject(PNagtoxtratINFO,FlexPrintJobScaleType.MATCH_WIDTH);
+                	printJob.addObject(PNevolucaoINFO,FlexPrintJobScaleType.MATCH_WIDTH);
+               
+
+            
+            	printJob.send();
+			}
+			
+			protected function BTimprimir():void{
+				imprimir();
+			}
+			
+		
+			
+			
+	]]>
+	</mx:Script>		
+			
+<mx:Panel id="PNmain" horizontalCenter="0" verticalCenter="0" width="96%" height="90%" layout="absolute" horizontalScrollPolicy="auto" verticalScrollPolicy="auto">			
+	
+	<mx:Panel width="1400" height="1960" layout="absolute" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNpacientINFO" title="Paciente, solicitante e exposição" fontFamily="Times New Roman" fontSize="28" horizontalScrollPolicy="off" verticalScrollPolicy="off" top="0" left="0">
+		<mx:Label text="Nome paciente:" id="LBnomepaciente" fontFamily="Times New Roman" fontSize="26" width="189" left="10" top="10" height="35" fontStyle="normal" fontWeight="bold"/>
+		<mx:Label text="lidia maria beirão de souza lidia maria beirão de souza" id="LBnomepacienteR" fontFamily="Times New Roman" fontSize="26" width="778" left="220" top="10" height="35"/>
+		<mx:Label text="lidia maria beirão de souza lidia maria beirão de souza" id="LBnomesolicitanteR" fontFamily="Times New Roman" fontSize="26" width="808" left="285" top="509" height="35"/>
+		<mx:Label text="lidia maria beirão de souza lidia maria beirão de souza" id="LBinstituicaoR" fontFamily="Times New Roman" fontSize="26" width="1195" left="175" top="605" height="35"/>
+		<mx:Label text="lidia maria beirão de souza lidia maria beirão de souza" id="LBenderecoSR" fontFamily="Times New Roman" fontSize="26" width="883" left="175" top="653" height="35"/>
+		<mx:Label text="Idade paciente:" id="LBidade" fontFamily="Times New Roman" fontSize="26" top="55" right="1191" width="179" fontWeight="bold" height="35"/>
+		<mx:Label text="1000" id="LBidadeNR" fontFamily="Times New Roman" fontSize="26" top="55" right="1109" width="72" height="35"/>
+		<mx:Label text="hora" id="LBidadeTR" fontFamily="Times New Roman" fontSize="26" top="55" right="1022" width="70" fontWeight="normal" fontStyle="italic" height="35"/>
+		<mx:Label text="Sexo:" id="LBSexo" fontFamily="Times New Roman" fontSize="26" top="10" fontWeight="bold" height="35" right="160" width="92"/>
+		<mx:Label text="feminino" id="LBSexoR" fontFamily="Times New Roman" fontSize="26" top="10" height="35" right="10" width="133"/>
+		<mx:Label text="Peso paciente:" id="LBpeso" fontFamily="Times New Roman" fontSize="26" top="55" right="726" width="179" fontWeight="bold" height="35"/>
+		<mx:Label text="1000" id="LBpesoR" fontFamily="Times New Roman" fontSize="26" top="55" height="35" left="680" width="74"/>
+		<mx:Label text="Kg" id="LBKg" fontFamily="Times New Roman" fontSize="26" top="55" fontWeight="bold" fontStyle="italic" height="35" left="775" width="50"/>
+		<mx:Label text="Espécie (se animal):" id="LBespecie" fontFamily="Times New Roman" fontSize="26" right="453" width="247" top="144" fontWeight="bold" height="35"/>
+		<mx:Label text="macacocão" id="LBespecieR" fontFamily="Times New Roman" fontSize="26" right="10" width="410" top="144" height="35"/>
+		<mx:Label text="Profissão/Ocupação:" id="LBprofissao" fontFamily="Times New Roman" fontSize="26" right="428" width="272" top="96" fontWeight="bold" height="35"/>
+		<mx:Label text="técnico de informatica" id="LBprofissaoR" fontFamily="Times New Roman" fontSize="26" right="10" width="410" top="96" height="35"/>
+		<mx:Label text="Endereço:" id="LBEndereco" fontFamily="Times New Roman" fontSize="26" top="235" left="10" width="134" fontWeight="bold" height="35"/>
+		<mx:Label text="tv mauriti passagem heraldo" id="LBEnderecoR" fontFamily="Times New Roman" fontSize="26" top="235" left="171" width="859" height="35"/>
+		<mx:Label text="Bairro:" id="LBBairro" fontFamily="Times New Roman" fontSize="26" top="278" right="394" width="143" height="35" fontWeight="bold"/>
+		<mx:Label text="Bairro:" id="LBBairroR" fontFamily="Times New Roman" fontSize="26" top="278" right="10" width="376" height="35"/>
+		<mx:Label text="Bairro:" id="LBBairroRS" fontFamily="Times New Roman" fontSize="26" top="701" right="10" width="376" height="35"/>
+		<mx:Label text="Estado:" id="LBestado" fontFamily="Times New Roman" fontSize="26" left="475" width="100" top="187" fontWeight="bold" height="35"/>
+		<mx:Label text="Matro grosso do norte" id="LBestadoR" fontFamily="Times New Roman" fontSize="26" left="596" width="295" top="187" height="35"/>
+		<mx:Label text="Município:" id="LBmunicipio" fontFamily="Times New Roman" fontSize="26" top="187" width="163" right="280" fontWeight="bold" height="35"/>
+		<mx:Label text="belem" id="LBmunicipioR" fontFamily="Times New Roman" fontSize="26" top="187" width="248" right="10" height="35"/>
+		<mx:Label text="Telefone:" id="LBTelefone" fontFamily="Times New Roman" fontSize="26" width="140" top="96" left="10" height="35" fontWeight="bold"/>
+		<mx:Label text="91" id="LBTelefoneDDDR" fontFamily="Times New Roman" fontSize="26" width="59" top="96" left="171" height="35"/>
+		<mx:Label text="91" id="LBTelefoneSDDDR" fontFamily="Times New Roman" fontSize="26" width="60" top="562" left="150" height="35"/>
+		<mx:Label text="983592785" id="LBTelefoneR" fontFamily="Times New Roman" fontSize="26" width="151" top="96" left="249" height="35"/>
+		<mx:Label text="983592785" id="LBTelefoneSR" fontFamily="Times New Roman" fontSize="26" width="150" top="562" left="225" height="35"/>
+		<mx:Label text="983592785" id="LBramalSR" fontFamily="Times New Roman" fontSize="26" top="562" height="35" right="10" width="242"/>
+		
+		
+		<mx:Label text="Centro:" id="LBCentro" fontFamily="Times New Roman" fontSize="26" left="10" width="134" height="35" top="321" fontWeight="bold"/>
+		<mx:Label text="hospital universitario joão de barros barreto" id="LBCentroR" fontFamily="Times New Roman" fontSize="26" left="165" width="762" height="35" top="321" fontWeight="normal"/>
+		<mx:Label text="Data:" id="LBdata" fontFamily="Times New Roman" fontSize="26" left="10" width="89" top="366" height="35" fontWeight="bold"/>
+		<mx:Label text="31/12/2015" id="LBdataR" fontFamily="Times New Roman" fontSize="26" left="125" width="170" top="369" height="35"/>
+		<mx:Label text="Nº.:" id="LBnumero" fontFamily="Times New Roman" fontSize="26" width="70" right="244" height="35" top="230" fontWeight="bold"/>
+		<mx:Label text="10000" id="LBnumeroR" fontFamily="Times New Roman" fontSize="26" width="185" right="10" height="35" top="235"/>
+		<mx:Label text="Semana:" id="LBsem" fontFamily="Times New Roman" fontSize="26" height="35" width="136" top="369" left="475" fontWeight="bold"/>
+		<mx:Label text="Segunda-feira" id="LBsemR" fontFamily="Times New Roman" fontSize="26" height="35" width="191" top="369" left="634" fontWeight="normal" fontStyle="normal"/>
+		<mx:Label text="Hora:" id="LBhoraID" fontFamily="Times New Roman" fontSize="26" height="35" top="369" left="1025" width="111" fontWeight="bold"/>
+		<mx:Label text="00:00" id="LBhoraIDR" fontFamily="Times New Roman" fontSize="26" height="35" top="369" left="1185" fontWeight="normal" right="10"/>
+		<mx:Label text="NúmeroID:" id="LBnumeroUnico" fontFamily="Times New Roman" fontSize="26" width="176" right="244" height="35" top="321" fontWeight="bold"/>
+		<mx:Label text="1000000" id="LBnumeroUnicoR" fontFamily="Times New Roman" fontSize="26" width="185" right="10" height="35" top="321" fontWeight="normal"/>
+		<mx:Label text="1000000" id="LBnumeroENDRS" fontFamily="Times New Roman" fontSize="26" width="149" right="10" height="35" top="650" fontWeight="normal"/>
+		<mx:Label text="Gestante (Tempo):" id="LBgestanteTemp" fontFamily="Times New Roman" fontSize="26" width="235" top="187" left="10" height="35" fontWeight="bold"/>
+		<mx:Label text="Trim. Desc." id="LBgestanteTempR" fontFamily="Times New Roman" fontSize="26" width="153" top="187" left="270" height="35"/>
+		<mx:Label text="Gestante :" id="LBgestante" fontFamily="Times New Roman" fontSize="26" left="10" width="150" top="144" fontWeight="bold" height="35"/>
+		<mx:Label text="Não se aplica" id="LBgestanteR" fontFamily="Times New Roman" fontSize="26" left="171" width="187" top="144" height="35"/>
+		<mx:Label text="Vítima :" id="LBvitima" fontFamily="Times New Roman" fontSize="26" left="10" width="134" height="35" top="278" fontWeight="bold"/>
+		<mx:Label text="Informação" id="LBvitimaR" fontFamily="Times New Roman" fontSize="26" left="165" width="214" height="35" top="278"/>
+		<mx:Label text="Nome do solicitante:" id="LBnomeSolicitante" fontFamily="Times New Roman" fontSize="26" width="255" height="35" left="10" top="509" fontWeight="bold"/>
+		<mx:Label text="Instituição:" id="LBInstituicaoS" fontFamily="Times New Roman" fontSize="26" height="35" top="605" left="10" width="150" fontWeight="bold"/>
+		<mx:Label text="Telefone:" id="LBTelefoneS" fontFamily="Times New Roman" fontSize="26" width="120" height="35" left="10" top="562" fontWeight="bold"/>
+		<mx:Label text="Ramal:" id="LBRamals" fontFamily="Times New Roman" fontSize="26" top="562" height="35" fontWeight="bold" right="286" width="100"/>
+		<mx:Label text="Endereço:" id="LBEnderecoS" fontFamily="Times New Roman" fontSize="26" width="150" left="10" top="653" fontWeight="bold" height="35"/>
+		<mx:Label text="Bairro:" id="LBBairroS" fontFamily="Times New Roman" fontSize="26" width="109" top="701" fontWeight="bold" height="35" right="428"/>
+		<mx:Label text="Nº.:" id="LBnumeroS" fontFamily="Times New Roman" fontSize="26" width="85" height="35" right="175" top="653" fontWeight="bold"/>
+		<mx:Label text="Estado:" id="LBestadoS" fontFamily="Times New Roman" fontSize="26" left="10" width="95" top="701" fontWeight="bold" height="35"/>
+		<mx:Label text="Matro grosso do norte" id="LBestadoRS" fontFamily="Times New Roman" fontSize="26" left="113" width="253" top="701" height="35"/>
+		<mx:Label text="Outro profissional da saúde" id="LBcategoriaRS" fontFamily="Times New Roman" fontSize="26" left="180" width="346" top="749" height="35"/>
+		<mx:Label text="Outro profissional da saúde" id="LBcategoriaCONTRS" fontFamily="Times New Roman" fontSize="26" top="749" height="35" right="10" width="819"/>
+		<mx:Label text="Município:" id="LBmunicipioS" fontFamily="Times New Roman" fontSize="26" top="701" width="135" fontWeight="bold" height="35" horizontalCenter="-237"/>
+		<mx:Label text="belem" id="LBmunicipioRS" fontFamily="Times New Roman" fontSize="26" top="701" width="268" height="35" horizontalCenter="-5"/>
+		<mx:Label text="Categoria:" id="LBcategoriaS" fontFamily="Times New Roman" fontSize="26" left="10" width="150" height="35" fontWeight="bold" top="749"/>
+		<mx:HRule left="0" right="0" top="479" height="2"/>
+		<mx:HRule left="0" right="0" top="840" height="2"/>
+		<mx:Label text="Circunstância:" id="LBcircunstancia" fontFamily="Times New Roman" fontSize="26" width="183" height="35" top="867" left="10" fontWeight="bold"/>
+		<mx:Label text="Prescrição medica inadequada" id="LBcircunstanciaR" fontFamily="Times New Roman" fontSize="26" width="325" height="35" top="867" left="205" fontWeight="normal"/>
+		<mx:Label text="Prescrição medica inadequada" id="LBcircunstanciaOTR" fontFamily="Times New Roman" fontSize="26" width="819" height="35" top="867" left="551" fontWeight="normal"/>
+		<mx:Label text="Outros serviços públicos:" id="LBestabelecimentoR" fontFamily="Times New Roman" fontSize="26" width="326" height="35" top="1082" left="249" fontWeight="normal"/>
+		<mx:Label text="Outros serviços públicos:" id="LBestabelecimentoOTR" fontFamily="Times New Roman" fontSize="26" height="35" top="1082" fontWeight="normal" right="10" width="774"/>
+		<mx:Label text="Ambiente de trabalho" id="LBLocalexposicaoR" fontFamily="Times New Roman" fontSize="26" width="260" height="35" top="1130" left="270" fontWeight="normal"/>
+		<mx:Label text="Ambiente de trabalho" id="LBLocalexposicaoOTR" fontFamily="Times New Roman" fontSize="26" height="35" top="1130" fontWeight="normal" right="10" width="800"/>
+		<mx:Label text="Tipo:" id="LBtipo" fontFamily="Times New Roman" fontSize="26" height="35" fontWeight="bold" top="915" right="300" width="83"/>
+		<mx:Label text="Aguda sobre crônica" id="LBtipoR" fontFamily="Times New Roman" fontSize="26" height="35" fontWeight="normal" top="915" right="0" width="280"/>
+		<mx:Label text="100000" id="LBtempdecoR" fontFamily="Times New Roman" fontSize="26" width="120" height="35" fontWeight="normal" top="958" left="381"/>
+		<mx:Label text="minuto" id="LBtempdecoR2" fontFamily="Times New Roman" fontSize="26" width="83" height="35" fontWeight="normal" top="958" left="520"/>
+		<mx:Label text="100000" id="LBduraexpR" fontFamily="Times New Roman" fontSize="26" height="35" fontWeight="normal" top="958" right="130" width="120"/>
+		<mx:Label text="minuto" id="LBduraexpR2" fontFamily="Times New Roman" fontSize="26" height="35" fontWeight="normal" top="958" right="10" width="101"/>
+		<mx:Label text="Ignorada" id="LBzonaR" fontFamily="Times New Roman" fontSize="26" width="165" height="35" fontWeight="normal" top="1178" left="130"/>
+		<mx:Label text="Tempo decorrido da exposição:" id="LBtempdeco" fontFamily="Times New Roman" fontSize="26" width="356" height="35" fontWeight="bold" top="958" left="10"/>
+		<mx:Label text="Via:" id="LBvia" fontFamily="Times New Roman" fontSize="26" width="77" height="35" fontWeight="bold" top="915" left="10"/>
+		<mx:Label text="Cutânea/mucosa" id="LBviaR" fontFamily="Times New Roman" fontSize="26" width="233" height="35" fontWeight="normal" top="915" left="100"/>
+		<mx:Label text="Duração da exposição:" id="LBduraexp" fontFamily="Times New Roman" fontSize="26" height="35" fontWeight="bold" top="958" right="285" width="320"/>
+		<mx:HRule top="1042" left="0" right="0" height="2"/>
+		<mx:Label text="Estabelecimento:" id="LBestabelecimento" fontFamily="Times New Roman" fontSize="26" width="231" height="35" top="1082" left="10" fontWeight="bold"/>
+		<mx:Label text="Local da exposição:" id="LBLocalexposicao" fontFamily="Times New Roman" fontSize="26" width="235" height="35" top="1130" left="10" fontWeight="bold"/>
+		<mx:Label text="Zona:" id="LBzona" fontFamily="Times New Roman" fontSize="26" width="100" height="35" top="1178" left="10" fontWeight="bold"/>
+		<mx:Label text="lidia maria beirão de souza lidia maria beirão de souza" id="LBenderecoLER" fontFamily="Times New Roman" fontSize="26" width="925" height="35" top="1231" left="160"/>
+		<mx:Label text="Bairro:" id="LBBairroRLE" fontFamily="Times New Roman" fontSize="26" width="373" height="35" top="1284" left="997"/>
+		<mx:Label text="1000000" id="LBnumeroENDRLE" fontFamily="Times New Roman" fontSize="26" height="35" fontWeight="normal" top="1231" right="10" width="149"/>
+		<mx:Label text="Endereço:" id="LBEnderecoLE" fontFamily="Times New Roman" fontSize="26" width="130" fontWeight="bold" top="1231" left="10" height="35"/>
+		<mx:Label text="Bairro:" id="LBBairroLE" fontFamily="Times New Roman" fontSize="26" width="108" fontWeight="bold" top="1284" height="35" left="855"/>
+		<mx:Label text="Nº.:" id="LBnumeroLE" fontFamily="Times New Roman" fontSize="26" width="83" height="35" fontWeight="bold" top="1231" right="175"/>
+		<mx:Label text="Estado:" id="LBestadoLE" fontFamily="Times New Roman" fontSize="26" width="100" fontWeight="bold" height="35" top="1284" left="10"/>
+		<mx:Label text="Matro grosso do norte" id="LBestadoRLE" fontFamily="Times New Roman" fontSize="26" width="253" height="35" top="1284" left="121"/>
+		<mx:Label text="Município:" id="LBmunicipioLE" fontFamily="Times New Roman" fontSize="26" width="140" fontWeight="bold" height="35" top="1284" left="397"/>
+		<mx:Label text="belem" id="LBmunicipioRLE" fontFamily="Times New Roman" fontSize="26" width="269" height="35" top="1284" left="555"/>
+	</mx:Panel>
+	<mx:Panel width="1400" height="1960" layout="absolute" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNagtoxtratINFO" title="Agente tóxico, tratamento e resumo" fontFamily="Times New Roman" fontSize="28" horizontalScrollPolicy="off" verticalScrollPolicy="off" left="0" top="1970">
+		<mx:Label text="Nome comercial / Espécie" id="LBnomepaciente0" fontFamily="Times New Roman" fontSize="26" width="326" left="10" top="10" height="35" fontStyle="normal" fontWeight="bold"/>
+		<mx:Label text="Princípio ativo" id="LBidade0" fontFamily="Times New Roman" fontSize="26" top="10" right="529" width="198" fontWeight="bold" height="35"/>
+		<mx:Label text="Dose/ quantidade" id="LBSexo0" fontFamily="Times New Roman" fontSize="26" width="262" top="10" left="371" fontWeight="bold" height="35"/>
+		<mx:Label text="Classificação:" id="LBdata0" fontFamily="Times New Roman" fontSize="26" left="10" width="201" top="725" height="35" fontWeight="bold"/>
+		<mx:Label text="Animais peçonhentos/venenosos" id="LBclassAT" fontFamily="Times New Roman" fontSize="26" height="35" width="392" top="725" left="250" fontWeight="normal" fontStyle="normal"/>
+		<mx:Label text="Animais peçonhentos/venenosos" id="LBclassAT2" fontFamily="Times New Roman" fontSize="26" height="35" top="725" left="682" width="688" fontWeight="normal"/>
+		<mx:Label text="Tratamento inicial" id="LBnomeSolicitante0" fontFamily="Times New Roman" fontSize="26" width="299" height="35" left="10" top="790.5" fontWeight="bold"/>
+		<mx:TextArea height="622.5" left="10" right="10" top="65" id="TAagentToxico" fontFamily="Times New Roman" fontSize="26" editable="false"/>
+		<mx:TextArea height="120" left="10" right="10" top="834.5" id="TAtratamentoIni" fontFamily="Times New Roman" fontSize="26" editable="false"/>
+		<mx:TextArea height="120" left="10" right="10" top="1012" id="TAtratamentoProp" fontFamily="Times New Roman" fontSize="26" editable="false"/>
+		<mx:TextArea height="120" left="10" right="10" top="1189" id="TAtratamentoReal" fontFamily="Times New Roman" fontSize="26" editable="false"/>
+		<mx:Label text="Tratamento proposto" id="LBnomeSolicitante1" fontFamily="Times New Roman" fontSize="26" width="326" height="35" left="10" top="967.5" fontWeight="bold"/>
+		<mx:Label text="Tratamento realizado" id="LBnomeSolicitante2" fontFamily="Times New Roman" fontSize="26" width="326" height="35" left="10" top="1140.5" fontWeight="bold"/>
+		<mx:HRule height="2" y="1348" left="0" right="0"/>
+		<mx:Label text="Manifestação clínica:" id="LBmanifestacaoclin" fontFamily="Times New Roman" fontSize="26" width="272" height="35" top="1374" left="10" fontWeight="bold"/>
+		<mx:Label text="Ignorada" id="LBmanifestacaoclinR" fontFamily="Times New Roman" fontSize="26" width="200" height="35" top="1374" left="300" fontWeight="normal"/>
+		<mx:Label text="Moderado" id="LBgravidadeR" fontFamily="Times New Roman" fontSize="26" width="192" height="35" top="1650" left="503" fontWeight="normal"/>
+		<mx:Label text="Análise toxicológica:" id="LBanalisetoxi" fontFamily="Times New Roman" fontSize="26" height="35" top="1374" fontWeight="bold" right="227" width="280"/>
+		<mx:Label text="Ignorada" id="LBanalisetoxiR" fontFamily="Times New Roman" fontSize="26" height="35" top="1374" fontWeight="normal" right="10" width="188"/>
+		<mx:Label text="Internação:" id="LBinternacao" fontFamily="Times New Roman" fontSize="26" width="235" height="35" top="1427" left="10" fontWeight="bold"/>
+		<mx:Label text="Ignorada" id="LBinternacaoR" fontFamily="Times New Roman" fontSize="26" width="181" height="35" top="1427" left="300" fontWeight="normal"/>
+		<mx:Label text="Evolução:" id="LBevolucao" fontFamily="Times New Roman" fontSize="26" height="35" top="1477" left="10" width="201" fontWeight="bold"/>
+		<mx:Label text="Cura não confirmada" id="LBevolucaoR" fontFamily="Times New Roman" fontSize="26" height="35" top="1477" left="250" width="364" fontWeight="normal"/>
+		<mx:Label text="Cura não confirmada" id="LBevolucaoR2" fontFamily="Times New Roman" fontSize="26" height="35" top="1477" left="650" width="720" fontWeight="normal"/>
+		<mx:Label text="Diagnóstico definitivo:" id="LBdiagdefin" fontFamily="Times New Roman" fontSize="26" height="35" top="1526" left="10" width="282" fontWeight="bold"/>
+		<mx:Label text="C.I.D 10:" id="LBcid10" fontFamily="Times New Roman" fontSize="26" height="35" top="1526.05" right="180" width="121.25" fontWeight="bold"/>
+		<mx:Label text="Gravidade (Se por animal peçonhento):" id="LBgravidade" fontFamily="Times New Roman" fontSize="26" height="35" top="1650" left="10" width="471" fontWeight="bold"/>
+		<mx:Label text="Especificar:" id="LBespecificar" fontFamily="Times New Roman" fontSize="26" width="170" height="35" top="1427" left="550" fontWeight="bold"/>
+		<mx:Label text="Especificar:Cura não confirmada" id="LBespecificarR" fontFamily="Times New Roman" fontSize="26" height="35" top="1427" fontWeight="normal" right="10" width="624"/>
+		<mx:TextInput id="TIdiagdefinR" fontFamily="Times New Roman" fontSize="26" top="1526" height="100" editable="false" width="740" left="318"/>
+		<mx:TextInput id="TIcid10R" fontFamily="Times New Roman" fontSize="26" top="1526.05" height="60" editable="false" right="10" width="160"/>
+		<mx:Label text="Cura não confirmada" id="LBrespCadR" fontFamily="Times New Roman" fontSize="26" height="35" width="507.61365" fontWeight="normal" bottom="162.94995" left="529.55"/>
+		<mx:Label text="Cura não confirmada" id="LBgpagenteR" fontFamily="Times New Roman" fontSize="26" height="35" fontWeight="normal" bottom="102.94995" right="9.972717" width="998.9773"/>
+		<mx:Label id="LBgpagente" fontFamily="Times New Roman" fontSize="26" width="326.02274" height="35" fontWeight="bold" left="10" bottom="102.94995" text="Grupo do agente tóxico:"/>
+		<mx:Label text="Responsável pelo cadastro do paciente:" id="LBrespCad" fontFamily="Times New Roman" fontSize="26" width="490" height="35" fontWeight="bold" left="10" bottom="162.94995"/>
+		<mx:Label text="Data:" id="LBdataEvo" fontFamily="Times New Roman" fontSize="26" width="84" fontWeight="bold" height="35" right="230" bottom="163"/>
+		<mx:Label text="31/12/2015" id="LBdataEvoR" fontFamily="Times New Roman" fontSize="26" width="152" height="35" right="10" bottom="163"/>
+		
+	</mx:Panel>
+	
+	<mx:Panel width="1400" layout="absolute" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNbotao" fontFamily="Times New Roman" fontSize="22" horizontalScrollPolicy="off" verticalScrollPolicy="off" left="0" top="5910" height="72">
+		<ns1:ButtonEnter label="Imprimir" fontWeight="bold" id="BTImprimir" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" click="BTimprimir()" fontFamily="Times New Roman" fontSize="22" width="150" height="30" horizontalCenter="-1" top="0"/>
+		
+	</mx:Panel>
+	<mx:Panel width="1400" height="1960" layout="absolute" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNevolucaoINFO" title="Evolucao(observação)" fontFamily="Times New Roman" fontSize="28" horizontalScrollPolicy="off" verticalScrollPolicy="off" left="0" top="3941">
+			<mx:TextArea id="TAevoluObs" fontFamily="Times New Roman" fontSize="24" left="10" right="10" top="10" bottom="10" editable="false" maxChars="3000"/>
+		</mx:Panel>
+</mx:Panel>		
+</mx:Canvas>
+

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNbuscausuario" xmlns:ns1="*" initialize="inicio()">
+	
+	
+<mx:RemoteObject id="buspaci" destination="amfphp" source="php.BuscaPaciente" fault="FalhaObRemot(event)">
+		<mx:method name="semAcentuacaoP" result="semAcentuacaoP(event)" fault="FalhaMet(event)" />
+		<mx:method name="BuscaBancoP" result="BuscaBancoP(event)" fault="FalhaMet(event)" />
+		
+		</mx:RemoteObject>
+		
+
+	
+	
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			[Bindable]
+			public var buOUevo:Boolean;
+			[Bindable]
+			public var resulBusca:ArrayCollection;
+			
+		protected function FalhaMet(e:FaultEvent):void{// função para falha de metodo
+		
+				Alert.show(e.message.toString());
+		}
+		protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+		}
+			
+		private function  inicio():void{
+				limpaForm();
+		}
+		
+		protected function limpaForm():void{
+			TIbuscanomeP.text="";
+		}
+			
+		
+		protected function BuscaBancoP(ev:ResultEvent):void{
+	        var s:String= ev.result.toString();
+	        if (s=="false"){
+	        	Alert.show("Usuario não encontrado!");
+	        }else{
+				var ar:Array= s.split(",");
+				var myarr:Array = new Array();
+				var i:int= 0;
+				while(i < ar.length){
+					var obj: Object = new Object();
+						obj.col1 = ar[i];
+					 	obj.col2 = ar[i+1];
+						obj.col3 = ar[i+2];
+						obj.col4 = ar[i+3];
+						obj.col5 = ar[i+4];
+						obj.col6 = ar[i+5];
+						obj.col7 = ar[i+6];
+						myarr.push(obj);
+						i=i+7;
+				}
+				resulBusca= new ArrayCollection(myarr);
+	        }
+		}
+		
+		protected function semAcentuacaoP(ev:ResultEvent):void{
+			//Alert.show(ev.result.toString());
+			buspaci.BuscaBancoP(ev.result.toString());
+		
+		}	
+			
+		protected function BTbuscar():void{
+			if (TIbuscanomeP.text==""){
+				Alert.show("Digite um nome!");
+			}else{
+				buspaci.semAcentuacaoP(TIbuscanomeP.text);
+			}
+		}
+		protected function selectItem():void{
+			//Alert.show("oi");
+			if(buOUevo==true){
+				removeAllChildren();
+				var dados:DadosPaciente = new DadosPaciente();
+				dados.resulBdados = DGpacientebusca.selectedItem.col1+","+DGpacientebusca.selectedItem.col2+","+DGpacientebusca.selectedItem.col3+","+DGpacientebusca.selectedItem.col4+","+DGpacientebusca.selectedItem.col5+","+DGpacientebusca.selectedItem.col6+","+DGpacientebusca.selectedItem.col7;
+				addChild(dados as DisplayObject);
+			}else{
+				removeAllChildren();
+				var dadosE:Evolucao = new Evolucao();
+				dadosE.resulBdados = DGpacientebusca.selectedItem.col1+","+DGpacientebusca.selectedItem.col2+","+DGpacientebusca.selectedItem.col3+","+DGpacientebusca.selectedItem.col4+","+DGpacientebusca.selectedItem.col5+","+DGpacientebusca.selectedItem.col6+","+DGpacientebusca.selectedItem.col7;
+				addChild(dadosE as DisplayObject);
+			}
+		} 
+            
+            
+				
+				]]>
+	</mx:Script>	
+	
+	
+	
+	
+	
+	<mx:Panel width="96%" height="90%" layout="absolute" horizontalCenter="0" verticalCenter="0" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNbuscapaciente" title="Procurar paciente" fontFamily="Times New Roman" fontSize="16">
+
+		<mx:Label y="10" text="Nome: " id="LBnomeP" left="10" width="55" fontSize="16"/>
+		<mx:DataGrid width="96%" height="90%" id="DGpacientebusca" horizontalCenter="-5" bottom="10" dataProvider="{resulBusca}" itemClick="selectItem()" fontFamily="Times New Roman" fontSize="16">
+			<mx:columns>
+				<mx:DataGridColumn headerText="ID" dataField="col1" width="50"/>
+				<mx:DataGridColumn headerText="Nome" dataField="col2"/>
+				<mx:DataGridColumn headerText="Idade" dataField="col3"/>
+				<mx:DataGridColumn headerText="Sexo" dataField="col4"/>
+				<mx:DataGridColumn headerText="Estado" dataField="col5"/>
+				<mx:DataGridColumn headerText="Cidade" dataField="col6"/>
+				<mx:DataGridColumn headerText="Numero" dataField="col7"/>
+			</mx:columns>
+		</mx:DataGrid>
+		<mx:TextInput y="8" width="80%" id="TIbuscanomeP" left="73" fontSize="16"/>
+		<ns1:ButtonEnter y="8" label="Procurar" fontWeight="bold" click="BTbuscar();" id="BTbuscaP" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" right="10" fontFamily="Times New Roman" fontSize="16"/>
+	</mx:Panel>
+	
+</mx:Canvas>

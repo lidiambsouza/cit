@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- http://blog.flexexamples.com/2008/11/10/detecting-when-the-number-of-radio-buttons-changes-in-a-radio-button-group-in-flex/ -->
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+        layout="vertical"
+        verticalAlign="middle"
+        backgroundColor="white"
+        initialize="init();">
+
+    <mx:Script>
+        <![CDATA[
+            import mx.controls.Alert;
+
+            private function init():void {
+                radioGroup.addEventListener("numRadioButtonsChanged", radioGroup_numRadioButtonsChanged);
+            }
+
+            private function radioGroup_numRadioButtonsChanged(evt:Event):void {
+                var rb:RadioButton = radioGroup.getRadioButtonAt(radioGroup.numRadioButtons-1);
+                var alert:Alert = Alert.show(evt.toString(), "label:" + rb.label);
+                alert.status = "numRadioButtons:" + radioGroup.numRadioButtons;
+            }
+        ]]>
+    </mx:Script>
+
+    <mx:RadioButtonGroup id="radioGroup" />
+
+    <mx:HBox>
+        <mx:RadioButton id="radioButton1" label="Red" group="{radioGroup}" />
+        <mx:RadioButton id="radioButton2" label="Orange" group="{radioGroup}" />
+        <mx:RadioButton id="radioButton3" label="Yellow" group="{radioGroup}" />
+        <mx:RadioButton id="radioButton4" label="Green" group="{radioGroup}" />
+        <mx:RadioButton id="radioButton5" label="Blue" group="{radioGroup}" />
+    </mx:HBox>
+
+</mx:Application>

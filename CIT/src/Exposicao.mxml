@@ -1,0 +1,1167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNexposicao" xmlns:ns1="*" initialize="inicio()" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	
+<mx:RemoteObject id="cade" destination="amfphp" source="php.CadastroExposicao" fault="FalhaObRemot(event)">
+		<mx:method name="InsertBancoE" result="InsertBancoE(event)" fault="FalhaMet(event)" />	
+		<mx:method name="UpdateBancoE" result="UpdateBancoE(event)" fault="FalhaMet(event)" />			
+		</mx:RemoteObject>
+		
+<mx:RemoteObject id="consultpaci" destination="amfphp" source="php.ConsultarPaciente" fault="FalhaObRemot(event)">
+		<mx:method name="SelectBancoE" result="SelectBancoE(event)" fault="FalhaMet(event)" />
+		<mx:method name="SelectExist" result="SelectExist(event)" fault="FalhaMet(event)" />		
+		</mx:RemoteObject>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			[Bindable]
+			public var cadOUBusc:Boolean;
+			[Bindable]
+			public var Observacao:String;
+			
+			[Bindable]
+			public var UsuarioLogin:String;
+			
+			[Bindable]
+			public var Volta:Boolean;
+			
+			
+			[Bindable]
+			public var IDpaciente:int;
+			[Bindable]
+			public var circunstaniaEscolhida:String;
+			[Bindable]
+			public var tipoEscolhida:String;
+			[Bindable]
+			public var viaEscolhida:String;
+			[Bindable]
+			public var tempoEscolhida:String;
+			[Bindable]
+			public var duracaoEscolhida:String;
+			
+			
+			
+		protected function FalhaMet(e:FaultEvent):void{// função para falha de metodo
+		
+				Alert.show(e.message.toString());
+		}
+		protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+		}
+			
+			
+		private function  inicio():void{
+				limpaForm();
+				consultpaci.SelectExist(IDpaciente,"exposicao");
+				
+		}
+		protected function SelectExist(evt:ResultEvent):void{
+			if(evt.result.toString()=="true"){
+				consultpaci.SelectBancoE(IDpaciente);
+				Volta=true;
+			}else{
+				Volta=false;
+			}
+		}
+		
+		protected function SelectBancoE(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				var arE:Array= s.split(",");
+				//LBcircunstanciaR.text=arE[2];
+				switch(arE[2]){
+					case"Acidente individual":
+						circunstancia(0);
+					break;
+					case"Acidente coletivo":
+						circunstancia(1);
+					break;
+					case"Acidente ambiental":
+						circunstancia(2);
+					break;
+					case"Acidente ocupacional":
+						circunstancia(3);
+					break;
+					case"Uso terapêutico":
+						circunstancia(4);
+					break;
+					case"Prescrição medica inadequada":
+						circunstancia(5);
+					break;
+					case"Erro de administração":
+						circunstancia(6);
+					break;
+					case"Auto medicação":
+						circunstancia(7);
+					break;
+					case"Abstinência":
+						circunstancia(8);
+					break;
+					case"Abuso":
+						circunstancia(9);
+					break;
+					case"Ingestão de Alimento":
+						circunstancia(10);
+					break;
+					case"Tentativa de suicídio":
+						circunstancia(11);
+					break;
+					case"Tentativa de aborto":
+						circunstancia(12);
+					break;
+					case"Violência/homicídio":
+						circunstancia(13);
+					break;
+					case"Ignorada":
+						circunstancia(14);
+					break;
+					case"Outros":
+						circunstancia(15);
+					break;				
+				}
+				TIoutro.text=arE[3];
+				
+				//LBviaR.text=arE[4];
+				switch(arE[4]){
+					case"Oral":
+						via(0);
+					break;
+					case"Cutânea/mucosa":
+						via(1);
+					break;
+					case"Respiratória":
+						via(2);
+					break;
+					case"Parenteral":
+						via(3);
+					break;
+					case"Nasal":
+						via(4);
+					break;
+					case"Intramuscular":
+						via(5);
+					break;
+					case"Ocular":
+						via(6);
+					break;
+					case"Retal":
+						via(7);
+					break;
+					case"Vaginal":
+						via(8);
+					break;
+					case"Ignorada":
+						via(9);
+					break;						
+				}
+				
+				//LBtipoR.text=arE[5];
+				switch(arE[5]){
+					case"Aguda-única":
+						tipo(0);
+					break;
+					case"Aguda-repetida":
+						tipo(1);
+					break;
+					case"Crônica":
+						tipo(2);
+					break;
+					case"Aguda sobre crônica":
+						tipo(3);
+					break;
+					case"Ignorada":
+						tipo(4);
+					break;									
+				}
+				
+				TItipodec.text=arE[6];
+				//LBtempdecoR2.text=arE[7];
+				switch(arE[7]){
+					case"Minuto":
+						tempoDecorrido(0);
+					break;
+					case"Hora":
+						tempoDecorrido(1);
+					break;
+					case"Dia":
+						tempoDecorrido(2);
+					break;
+					case"Mês":
+						tempoDecorrido(3);
+					break;
+					case"Ano":
+						tempoDecorrido(4);
+					break;									
+				}
+				
+				TItipodura.text=arE[8];
+				//LBduraexpR2.text=arE[9];
+				switch(arE[9]){
+					case"Minuto":
+						duracao(0);
+					break;
+					case"Hora":
+						duracao(1);
+					break;
+					case"Dia":
+						duracao(2);
+					break;
+					case"Mês":
+						duracao(3);
+					break;
+					case"Ano":
+						duracao(4);
+					break;									
+				}
+				
+			}
+		
+		protected function UpdateBancoE(evt:ResultEvent):void{
+			if(evt.result.toString()=="false"){
+				Alert.show("Erro! Dados não cadastrados!");
+				
+			}else{
+				removeAllChildren();
+				var tela:AgenteToxico = new AgenteToxico();
+				tela.IDpaciente=IDpaciente;
+				tela.cadOUBusc=cadOUBusc;
+				tela.Observacao=Observacao;
+				tela.UsuarioLogin=UsuarioLogin;
+				//tela.Volta=true;
+				addChild(tela as DisplayObject);
+			}
+			
+		}
+		
+		protected function limpaForm():void{
+			//TIbuscanomeS.text="";
+		}
+		protected function InsertBancoE(evt:ResultEvent):void{
+			//Alert.show(evt.result.toString());
+			if(evt.result.toString()=="false"){
+				Alert.show("Erro! Dados não cadastrados!");
+				
+			}else{
+				//IDpacientBanco=parseInt(evt.result.toString());
+				//Alert.show(IDpacientBanco.toString());
+				proximoTela();
+			}
+			
+		}
+		protected function proximoTela():void{
+			removeAllChildren();
+			var tela:AgenteToxico = new AgenteToxico();
+			tela.IDpaciente=IDpaciente;
+			tela.cadOUBusc=cadOUBusc;
+			tela.UsuarioLogin=UsuarioLogin;
+			tela.Observacao=Observacao;
+			addChild(tela as DisplayObject);
+		}
+		
+		protected function circunstancia(flag:int):void{
+			switch(flag.toString()){
+				case "0":
+				{
+					CBacidindividual.selected=true;
+					CBacidcoletivo.selected=false;
+					CBacidambiental.selected=false;
+					CBacidocupacional.selected=false;
+					CBusoterap.selected=false;
+					CBpresmedind.selected=false;
+					CBerradm.selected=false;
+					CBautomed.selected=false;
+					CBabst.selected=false;
+					CBabuso.selected=false;
+					CBingesali.selected=false;
+					CBtentsuici.selected=false;
+					CBtentaborto.selected=false;
+					CBviolhomi.selected=false;
+					CBignorada.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					circunstaniaEscolhida=CBacidindividual.label;
+					break;
+				}
+				case "1":
+				{
+					CBacidindividual.selected=false;
+					CBacidcoletivo.selected=true;
+					CBacidambiental.selected=false;
+					CBacidocupacional.selected=false;
+					CBusoterap.selected=false;
+					CBpresmedind.selected=false;
+					CBerradm.selected=false;
+					CBautomed.selected=false;
+					CBabst.selected=false;
+					CBabuso.selected=false;
+					CBingesali.selected=false;
+					CBtentsuici.selected=false;
+					CBtentaborto.selected=false;
+					CBviolhomi.selected=false;
+					CBignorada.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					circunstaniaEscolhida=CBacidcoletivo.label;
+					break;
+				}
+				case "2":
+				{
+					CBacidindividual.selected=false;
+					CBacidcoletivo.selected=false;
+					CBacidambiental.selected=true;
+					CBacidocupacional.selected=false;
+					CBusoterap.selected=false;
+					CBpresmedind.selected=false;
+					CBerradm.selected=false;
+					CBautomed.selected=false;
+					CBabst.selected=false;
+					CBabuso.selected=false;
+					CBingesali.selected=false;
+					CBtentsuici.selected=false;
+					CBtentaborto.selected=false;
+					CBviolhomi.selected=false;
+					CBignorada.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					circunstaniaEscolhida=CBacidambiental.label;
+					break;
+				}
+				case "3":
+				{
+					CBacidindividual.selected=false;
+					CBacidcoletivo.selected=false;
+					CBacidambiental.selected=false;
+					CBacidocupacional.selected=true;
+					CBusoterap.selected=false;
+					CBpresmedind.selected=false;
+					CBerradm.selected=false;
+					CBautomed.selected=false;
+					CBabst.selected=false;
+					CBabuso.selected=false;
+					CBingesali.selected=false;
+					CBtentsuici.selected=false;
+					CBtentaborto.selected=false;
+					CBviolhomi.selected=false;
+					CBignorada.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					circunstaniaEscolhida=CBacidocupacional.label;
+					break;
+				}
+				case "4":
+				{
+					CBacidindividual.selected=false;
+					CBacidcoletivo.selected=false;
+					CBacidambiental.selected=false;
+					CBacidocupacional.selected=false;
+					CBusoterap.selected=true;
+					CBpresmedind.selected=false;
+					CBerradm.selected=false;
+					CBautomed.selected=false;
+					CBabst.selected=false;
+					CBabuso.selected=false;
+					CBingesali.selected=false;
+					CBtentsuici.selected=false;
+					CBtentaborto.selected=false;
+					CBviolhomi.selected=false;
+					CBignorada.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					circunstaniaEscolhida=CBusoterap.label;
+					break;
+				}
+				case "5":
+				{
+					CBacidindividual.selected=false;
+					CBacidcoletivo.selected=false;
+					CBacidambiental.selected=false;
+					CBacidocupacional.selected=false;
+					CBusoterap.selected=false;
+					CBpresmedind.selected=true;
+					CBerradm.selected=false;
+					CBautomed.selected=false;
+					CBabst.selected=false;
+					CBabuso.selected=false;
+					CBingesali.selected=false;
+					CBtentsuici.selected=false;
+					CBtentaborto.selected=false;
+					CBviolhomi.selected=false;
+					CBignorada.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					circunstaniaEscolhida=CBpresmedind.label;
+					break;
+				}
+				case "6":
+				{
+					CBacidindividual.selected=false;
+					CBacidcoletivo.selected=false;
+					CBacidambiental.selected=false;
+					CBacidocupacional.selected=false;
+					CBusoterap.selected=false;
+					CBpresmedind.selected=false;
+					CBerradm.selected=true;
+					CBautomed.selected=false;
+					CBabst.selected=false;
+					CBabuso.selected=false;
+					CBingesali.selected=false;
+					CBtentsuici.selected=false;
+					CBtentaborto.selected=false;
+					CBviolhomi.selected=false;
+					CBignorada.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					circunstaniaEscolhida=CBerradm.label;
+					break;
+				}
+				case "7":
+				{
+					CBacidindividual.selected=false;
+					CBacidcoletivo.selected=false;
+					CBacidambiental.selected=false;
+					CBacidocupacional.selected=false;
+					CBusoterap.selected=false;
+					CBpresmedind.selected=false;
+					CBerradm.selected=false;
+					CBautomed.selected=true;
+					CBabst.selected=false;
+					CBabuso.selected=false;
+					CBingesali.selected=false;
+					CBtentsuici.selected=false;
+					CBtentaborto.selected=false;
+					CBviolhomi.selected=false;
+					CBignorada.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					circunstaniaEscolhida=CBautomed.label;
+					break;
+				}
+				case "8":
+				{
+					CBacidindividual.selected=false;
+					CBacidcoletivo.selected=false;
+					CBacidambiental.selected=false;
+					CBacidocupacional.selected=false;
+					CBusoterap.selected=false;
+					CBpresmedind.selected=false;
+					CBerradm.selected=false;
+					CBautomed.selected=false;
+					CBabst.selected=true;
+					CBabuso.selected=false;
+					CBingesali.selected=false;
+					CBtentsuici.selected=false;
+					CBtentaborto.selected=false;
+					CBviolhomi.selected=false;
+					CBignorada.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					circunstaniaEscolhida=CBabst.label;
+					break;
+				}
+				case "9":
+				{
+					CBacidindividual.selected=false;
+					CBacidcoletivo.selected=false;
+					CBacidambiental.selected=false;
+					CBacidocupacional.selected=false;
+					CBusoterap.selected=false;
+					CBpresmedind.selected=false;
+					CBerradm.selected=false;
+					CBautomed.selected=false;
+					CBabst.selected=false;
+					CBabuso.selected=true;
+					CBingesali.selected=false;
+					CBtentsuici.selected=false;
+					CBtentaborto.selected=false;
+					CBviolhomi.selected=false;
+					CBignorada.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					circunstaniaEscolhida=CBabuso.label;
+					break;
+				}
+				case "10":
+				{
+					CBacidindividual.selected=false;
+					CBacidcoletivo.selected=false;
+					CBacidambiental.selected=false;
+					CBacidocupacional.selected=false;
+					CBusoterap.selected=false;
+					CBpresmedind.selected=false;
+					CBerradm.selected=false;
+					CBautomed.selected=false;
+					CBabst.selected=false;
+					CBabuso.selected=false;
+					CBingesali.selected=true;
+					CBtentsuici.selected=false;
+					CBtentaborto.selected=false;
+					CBviolhomi.selected=false;
+					CBignorada.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					circunstaniaEscolhida=CBingesali.label;
+					break;
+				}
+				case "11":
+				{
+					CBacidindividual.selected=false;
+					CBacidcoletivo.selected=false;
+					CBacidambiental.selected=false;
+					CBacidocupacional.selected=false;
+					CBusoterap.selected=false;
+					CBpresmedind.selected=false;
+					CBerradm.selected=false;
+					CBautomed.selected=false;
+					CBabst.selected=false;
+					CBabuso.selected=false;
+					CBingesali.selected=false;
+					CBtentsuici.selected=true;
+					CBtentaborto.selected=false;
+					CBviolhomi.selected=false;
+					CBignorada.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					circunstaniaEscolhida=CBtentsuici.label;
+					break;
+				}
+				case "12":
+				{
+					CBacidindividual.selected=false;
+					CBacidcoletivo.selected=false;
+					CBacidambiental.selected=false;
+					CBacidocupacional.selected=false;
+					CBusoterap.selected=false;
+					CBpresmedind.selected=false;
+					CBerradm.selected=false;
+					CBautomed.selected=false;
+					CBabst.selected=false;
+					CBabuso.selected=false;
+					CBingesali.selected=false;
+					CBtentsuici.selected=false;
+					CBtentaborto.selected=true;
+					CBviolhomi.selected=false;
+					CBignorada.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					circunstaniaEscolhida=CBtentaborto.label;
+					break;
+				}
+				case "13":
+				{
+					CBacidindividual.selected=false;
+					CBacidcoletivo.selected=false;
+					CBacidambiental.selected=false;
+					CBacidocupacional.selected=false;
+					CBusoterap.selected=false;
+					CBpresmedind.selected=false;
+					CBerradm.selected=false;
+					CBautomed.selected=false;
+					CBabst.selected=false;
+					CBabuso.selected=false;
+					CBingesali.selected=false;
+					CBtentsuici.selected=false;
+					CBtentaborto.selected=false;
+					CBviolhomi.selected=true;
+					CBignorada.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					circunstaniaEscolhida=CBviolhomi.label;
+					break;
+				}
+				case "14":
+				{
+					CBacidindividual.selected=false;
+					CBacidcoletivo.selected=false;
+					CBacidambiental.selected=false;
+					CBacidocupacional.selected=false;
+					CBusoterap.selected=false;
+					CBpresmedind.selected=false;
+					CBerradm.selected=false;
+					CBautomed.selected=false;
+					CBabst.selected=false;
+					CBabuso.selected=false;
+					CBingesali.selected=false;
+					CBtentsuici.selected=false;
+					CBtentaborto.selected=false;
+					CBviolhomi.selected=false;
+					CBignorada.selected=true;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					circunstaniaEscolhida=CBignorada.label;
+					break;
+				}
+				case "15":
+				{
+					CBacidindividual.selected=false;
+					CBacidcoletivo.selected=false;
+					CBacidambiental.selected=false;
+					CBacidocupacional.selected=false;
+					CBusoterap.selected=false;
+					CBpresmedind.selected=false;
+					CBerradm.selected=false;
+					CBautomed.selected=false;
+					CBabst.selected=false;
+					CBabuso.selected=false;
+					CBingesali.selected=false;
+					CBtentsuici.selected=false;
+					CBtentaborto.selected=false;
+					CBviolhomi.selected=false;
+					CBignorada.selected=false;
+					CBoutros.selected=true;
+					TIoutro.editable=true;
+					
+					circunstaniaEscolhida=CBoutros.label;
+					break;
+				}
+				default:
+				{
+					CBacidindividual.selected=false;
+					CBacidcoletivo.selected=false;
+					CBacidambiental.selected=false;
+					CBacidocupacional.selected=false;
+					CBusoterap.selected=false;
+					CBpresmedind.selected=false;
+					CBerradm.selected=false;
+					CBautomed.selected=false;
+					CBabst.selected=false;
+					CBabuso.selected=false;
+					CBingesali.selected=false;
+					CBtentsuici.selected=false;
+					CBtentaborto.selected=false;
+					CBviolhomi.selected=false;
+					CBignorada.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					circunstaniaEscolhida="";
+					break;
+				}
+			
+			}		
+		}
+		
+		protected function via(flag:int):void{
+			switch(flag.toString()){
+				case "0":
+				{
+					CBoral.selected=true;
+					CBcutmuc.selected=false;
+					CBresp.selected=false;
+					CBparent.selected=false;
+					CBnasal.selected=false;
+					CBintmusc.selected=false;
+					CBocular.selected=false;
+					CBretal.selected=false;
+					CBvaginal.selected=false;
+					CBignoradaVia.selected=false;
+					
+					viaEscolhida=CBoral.label;
+					break;
+				}
+				case "1":
+				{
+					CBoral.selected=false;
+					CBcutmuc.selected=true;
+					CBresp.selected=false;
+					CBparent.selected=false;
+					CBnasal.selected=false;
+					CBintmusc.selected=false;
+					CBocular.selected=false;
+					CBretal.selected=false;
+					CBvaginal.selected=false;
+					CBignoradaVia.selected=false;
+					
+					viaEscolhida=CBcutmuc.label;
+					break;
+				}
+				case "2":
+				{
+					CBoral.selected=false;
+					CBcutmuc.selected=false;
+					CBresp.selected=true;
+					CBparent.selected=false;
+					CBnasal.selected=false;
+					CBintmusc.selected=false;
+					CBocular.selected=false;
+					CBretal.selected=false;
+					CBvaginal.selected=false;
+					CBignoradaVia.selected=false;
+					
+					viaEscolhida=CBresp.label;
+					break;
+				}
+				case "3":
+				{
+					CBoral.selected=false;
+					CBcutmuc.selected=false;
+					CBresp.selected=false;
+					CBparent.selected=true;
+					CBnasal.selected=false;
+					CBintmusc.selected=false;
+					CBocular.selected=false;
+					CBretal.selected=false;
+					CBvaginal.selected=false;
+					CBignoradaVia.selected=false;
+					
+					viaEscolhida=CBparent.label;
+					break;
+				}
+				case "4":
+				{
+					CBoral.selected=false;
+					CBcutmuc.selected=false;
+					CBresp.selected=false;
+					CBparent.selected=false;
+					CBnasal.selected=true;
+					CBintmusc.selected=false;
+					CBocular.selected=false;
+					CBretal.selected=false;
+					CBvaginal.selected=false;
+					CBignoradaVia.selected=false;
+					
+					viaEscolhida=CBnasal.label;
+					break;
+				}
+				case "5":
+				{
+					CBoral.selected=false;
+					CBcutmuc.selected=false;
+					CBresp.selected=false;
+					CBparent.selected=false;
+					CBnasal.selected=false;
+					CBintmusc.selected=true;
+					CBocular.selected=false;
+					CBretal.selected=false;
+					CBvaginal.selected=false;
+					CBignoradaVia.selected=false;
+					
+					viaEscolhida=CBintmusc.label;
+					break;
+				}
+				case "6":
+				{
+					CBoral.selected=false;
+					CBcutmuc.selected=false;
+					CBresp.selected=false;
+					CBparent.selected=false;
+					CBnasal.selected=false;
+					CBintmusc.selected=false;
+					CBocular.selected=true;
+					CBretal.selected=false;
+					CBvaginal.selected=false;
+					CBignoradaVia.selected=false;
+					
+					viaEscolhida=CBocular.label;
+					break;
+				}
+				case "7":
+				{
+					CBoral.selected=false;
+					CBcutmuc.selected=false;
+					CBresp.selected=false;
+					CBparent.selected=false;
+					CBnasal.selected=false;
+					CBintmusc.selected=false;
+					CBocular.selected=false;
+					CBretal.selected=true;
+					CBvaginal.selected=false;
+					CBignoradaVia.selected=false;
+					
+					viaEscolhida=CBretal.label;
+					break;
+				}
+				case "8":
+				{
+					CBoral.selected=false;
+					CBcutmuc.selected=false;
+					CBresp.selected=false;
+					CBparent.selected=false;
+					CBnasal.selected=false;
+					CBintmusc.selected=false;
+					CBocular.selected=false;
+					CBretal.selected=false;
+					CBvaginal.selected=true;
+					CBignoradaVia.selected=false;
+					
+					viaEscolhida=CBvaginal.label;
+					break;
+				}
+				case "9":
+				{
+					CBoral.selected=false;
+					CBcutmuc.selected=false;
+					CBresp.selected=false;
+					CBparent.selected=false;
+					CBnasal.selected=false;
+					CBintmusc.selected=false;
+					CBocular.selected=false;
+					CBretal.selected=false;
+					CBvaginal.selected=false;
+					CBignoradaVia.selected=true;
+					
+					viaEscolhida=CBignoradaVia.label;
+					break;
+				}
+				
+				default:
+				{
+					CBoral.selected=false;
+					CBcutmuc.selected=false;
+					CBresp.selected=false;
+					CBparent.selected=false;
+					CBnasal.selected=false;
+					CBintmusc.selected=false;
+					CBocular.selected=false;
+					CBretal.selected=false;
+					CBvaginal.selected=false;
+					CBignoradaVia.selected=false;
+					
+					viaEscolhida="";
+					
+					break;
+				}
+			
+			}		
+		}
+		
+		protected function tipo(flag:int):void{
+			switch(flag.toString()){
+				case "0":
+				{
+					CBagudauni.selected=true;
+					CBagudarep.selected=false;
+					CBcronica.selected=false;
+					CBAguda.selected=false;
+					CBignoTP.selected=false;
+					
+					tipoEscolhida=CBagudauni.label;
+					break;
+				}
+				case "1":
+				{
+					CBagudauni.selected=false;
+					CBagudarep.selected=true;
+					CBcronica.selected=false;
+					CBAguda.selected=false;
+					CBignoTP.selected=false;
+					
+					tipoEscolhida=CBagudarep.label;
+					break;
+				}
+				case "2":
+				{
+					CBagudauni.selected=false;
+					CBagudarep.selected=false;
+					CBcronica.selected=true;
+					CBAguda.selected=false;
+					CBignoTP.selected=false;
+					
+					tipoEscolhida=CBcronica.label;
+					break;
+				}
+				case "3":
+				{
+					CBagudauni.selected=false;
+					CBagudarep.selected=false;
+					CBcronica.selected=false;
+					CBAguda.selected=true;
+					CBignoTP.selected=false;
+					
+					tipoEscolhida=CBAguda.label;
+					break;
+				}
+				case "4":
+				{
+					CBagudauni.selected=false;
+					CBagudarep.selected=false;
+					CBcronica.selected=false;
+					CBAguda.selected=false;
+					CBignoTP.selected=true;
+					
+					tipoEscolhida=CBignoTP.label;
+					break;
+				}
+				
+				default:
+				{
+					CBagudauni.selected=false;
+					CBagudarep.selected=false;
+					CBcronica.selected=false;
+					CBAguda.selected=false;
+					CBignoTP.selected=false;
+					
+					tipoEscolhida="";					
+					break;
+				}
+			
+			}		
+		}
+		
+		protected function tempoDecorrido(flag:int):void{
+			switch(flag.toString()){
+				case "0":
+				{
+					CBtipomindec.selected=true;
+					CBtipohoradec.selected=false;
+					CBtipodiadec.selected=false;
+					CBtipomesdec.selected=false;
+					CBtipoanodec.selected=false;
+					
+					tempoEscolhida=CBtipomindec.label;
+					break;
+				}
+				case "1":
+				{
+					CBtipomindec.selected=false;
+					CBtipohoradec.selected=true;
+					CBtipodiadec.selected=false;
+					CBtipomesdec.selected=false;
+					CBtipoanodec.selected=false;
+					
+					tempoEscolhida=CBtipohoradec.label;
+					break;
+				}
+				case "2":
+				{
+					CBtipomindec.selected=false;
+					CBtipohoradec.selected=false;
+					CBtipodiadec.selected=true;
+					CBtipomesdec.selected=false;
+					CBtipoanodec.selected=false;
+					
+					tempoEscolhida=CBtipodiadec.label;
+					break;
+				}
+				case "3":
+				{
+					CBtipomindec.selected=false;
+					CBtipohoradec.selected=false;
+					CBtipodiadec.selected=false;
+					CBtipomesdec.selected=true;
+					CBtipoanodec.selected=false;
+					
+					tempoEscolhida=CBtipomesdec.label;
+					break;
+				}
+				case "4":
+				{
+					CBtipomindec.selected=false;
+					CBtipohoradec.selected=false;
+					CBtipodiadec.selected=false;
+					CBtipomesdec.selected=false;
+					CBtipoanodec.selected=true;
+					
+					tempoEscolhida=CBtipoanodec.label;
+					break;
+				}
+				
+				default:
+				{
+					CBtipomindec.selected=false;
+					CBtipohoradec.selected=false;
+					CBtipodiadec.selected=false;
+					CBtipomesdec.selected=false;
+					CBtipoanodec.selected=false;
+					
+					tempoEscolhida="";										
+					break;
+				}
+			
+			}		
+		}	
+  		
+		protected function duracao(flag:int):void{
+			switch(flag.toString()){
+				case "0":
+				{
+					CBtipomindura.selected=true;
+					CBtipohoradura.selected=false;
+					CBtipodiadura.selected=false;
+					CBtipomesdura.selected=false;
+					CBtipoanodura.selected=false;
+					
+					duracaoEscolhida=CBtipomindura.label;
+					break;
+				}
+				case "1":
+				{
+					CBtipomindura.selected=false;
+					CBtipohoradura.selected=true;
+					CBtipodiadura.selected=false;
+					CBtipomesdura.selected=false;
+					CBtipoanodura.selected=false;
+					
+					duracaoEscolhida=CBtipohoradura.label;
+					break;
+				}
+				case "2":
+				{
+					CBtipomindura.selected=false;
+					CBtipohoradura.selected=false;
+					CBtipodiadura.selected=true;
+					CBtipomesdura.selected=false;
+					CBtipoanodura.selected=false;
+					
+					duracaoEscolhida=CBtipodiadura.label;
+					break;
+				}
+				case "3":
+				{
+					CBtipomindura.selected=false;
+					CBtipohoradura.selected=false;
+					CBtipodiadura.selected=false;
+					CBtipomesdura.selected=true;
+					CBtipoanodura.selected=false;
+					
+					duracaoEscolhida=CBtipomesdura.label;
+					break;
+				}
+				case "4":
+				{
+					CBtipomindura.selected=false;
+					CBtipohoradura.selected=false;
+					CBtipodiadura.selected=false;
+					CBtipomesdura.selected=false;
+					CBtipoanodura.selected=true;
+					
+					duracaoEscolhida=CBtipoanodura.label;
+					break;
+				}
+				
+				default:
+				{
+					CBtipomindura.selected=false;
+					CBtipohoradura.selected=false;
+					CBtipodiadura.selected=false;
+					CBtipomesdura.selected=false;
+					CBtipoanodura.selected=false;
+					
+					duracaoEscolhida="";					
+					break;
+				}
+			
+			}		
+		}
+		protected function BTvoltar():void{
+			removeAllChildren();
+			var tela:LocalExposicao =new LocalExposicao();			
+			tela.IDpaciente=IDpaciente;
+			tela.cadOUBusc=cadOUBusc;
+			tela.UsuarioLogin=UsuarioLogin;
+			//tela.ObservacaoS=Observacao;
+			tela.Volta=true;
+			addChild(tela as DisplayObject);
+		}
+		
+		protected function BTproximo():void{
+			if(Volta){
+				cade.UpdateBancoE(IDpaciente,circunstaniaEscolhida,TIoutro.text,
+				viaEscolhida,tipoEscolhida,tempoEscolhida,TItipodec.text,
+				duracaoEscolhida,TItipodura.text);
+			}else{
+				cade.InsertBancoE(IDpaciente,circunstaniaEscolhida,TIoutro.text,
+				viaEscolhida,tipoEscolhida,tempoEscolhida,TItipodec.text,
+				duracaoEscolhida,TItipodura.text);
+			}
+		}           
+            
+				
+				]]>
+	</mx:Script>	
+	
+	
+	
+<mx:Panel horizontalScrollPolicy="auto" verticalScrollPolicy="auto" id="PNmain" horizontalCenter="0" verticalCenter="0" width="96%" height="90%" layout="absolute">	
+	
+	<mx:Panel width="1300" height="690" layout="absolute" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNexposicao" title="Exposição" fontFamily="Times New Roman" fontSize="16" left="0" top="0" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+		<mx:Label text="Circunstância:" id="LBcircunstancia" fontFamily="Times New Roman" fontSize="16" width="121" height="25" top="10" left="10"/>
+		<mx:Label text="Tipo:" id="LBtipo" fontFamily="Times New Roman" fontSize="16" width="121" height="25" top="10" left="910"/>
+		<mx:Label text="Tempo decorrido da exposição:" id="LBtempdeco" fontFamily="Times New Roman" fontSize="16" width="204" height="25" top="228" left="910"/>
+		<mx:CheckBox label="Crônica" id="CBcronica" fontFamily="Times New Roman" fontSize="16" width="180" top="115" left="910" click="tipo(2)"/>
+		<mx:CheckBox label="Aguda sobre crônica" id="CBAguda" fontFamily="Times New Roman" fontSize="16" width="180" top="152" left="910" click="tipo(3)"/>
+		<mx:CheckBox label="Ignorada" id="CBignoTP" fontFamily="Times New Roman" fontSize="16" width="146" top="189" left="910" click="tipo(4)"/>
+		<mx:CheckBox id="CBagudarep" fontFamily="Times New Roman" fontSize="16" label="Aguda-repetida" width="146" top="78" left="910" click="tipo(1)"/>
+		<mx:CheckBox label="Aguda-única" id="CBagudauni" fontFamily="Times New Roman" fontSize="16" width="146" top="43" left="910" click="tipo(0)"/>
+		<mx:CheckBox label="Acidente ambiental" id="CBacidambiental" fontFamily="Times New Roman" fontSize="16" width="180" top="115" left="10" click="circunstancia(2)"/>
+		<mx:CheckBox label="Outros" id="CBoutros" fontFamily="Times New Roman" fontSize="16" width="75" top="226" left="10" click="circunstancia(15)"/>
+		<mx:CheckBox label="Acidente ocupacional" id="CBacidocupacional" fontFamily="Times New Roman" fontSize="16" width="180" top="152" left="10" click="circunstancia(3)"/>
+		<mx:CheckBox label="Uso terapêutico" id="CBusoterap" fontFamily="Times New Roman" fontSize="16" width="146" top="189" left="10" click="circunstancia(4)"/>
+		<mx:CheckBox id="CBacidcoletivo" fontFamily="Times New Roman" fontSize="16" label="Acidente coletivo" width="146" top="78" left="10" click="circunstancia(1)"/>
+		<mx:CheckBox label="Acidente individual" id="CBacidindividual" fontFamily="Times New Roman" fontSize="16" width="146" top="43" left="10" click="circunstancia(0)"/>
+		<mx:CheckBox label="Auto medicação" id="CBautomed" fontFamily="Times New Roman" fontSize="16" width="145" top="115" left="228" click="circunstancia(7)"/>
+		<mx:CheckBox label="Abstinência" id="CBabst" fontFamily="Times New Roman" fontSize="16" width="123" top="152" left="228" click="circunstancia(8)"/>
+		<mx:CheckBox label="Abuso" id="CBabuso" fontFamily="Times New Roman" fontSize="16" width="97" top="189" left="228" click="circunstancia(9)"/>
+		<mx:CheckBox id="CBerradm" fontFamily="Times New Roman" fontSize="16" label="Erro de administração" width="180" top="78" left="228" click="circunstancia(6)"/>
+		<mx:CheckBox label="Prescrição medica inadequada" id="CBpresmedind" fontFamily="Times New Roman" fontSize="16" width="219" top="43" left="228" click="circunstancia(5)"/>
+		<mx:CheckBox label="Tentativa de aborto" id="CBtentaborto" fontFamily="Times New Roman" fontSize="16" width="180" top="115" left="479" click="circunstancia(12)"/>
+		<mx:CheckBox label="Violência/homicídio" id="CBviolhomi" fontFamily="Times New Roman" fontSize="16" width="180" top="152" left="479" click="circunstancia(13)"/>
+		<mx:CheckBox label="Ignorada" id="CBignorada" fontFamily="Times New Roman" fontSize="16" width="127" top="189" left="479" click="circunstancia(14)"/>
+		<mx:CheckBox id="CBtentsuici" fontFamily="Times New Roman" fontSize="16" label="Tentativa de suicídio" width="169" top="78" left="479" click="circunstancia(11)"/>
+		<mx:CheckBox label="Ingestão de Alimento" id="CBingesali" fontFamily="Times New Roman" fontSize="16" width="169" top="43" left="479" click="circunstancia(10)"/>
+		<mx:Label text="Via:" id="LBvia" fontFamily="Times New Roman" fontSize="16" width="121" height="25" top="290" left="10"/>
+		<mx:CheckBox label="Respiratória" id="CBresp" fontFamily="Times New Roman" fontSize="16" width="121" top="395" left="10" click="via(2)"/>
+		<mx:CheckBox label="Parenteral" id="CBparent" fontFamily="Times New Roman" fontSize="16" width="121" top="432" left="10" click="via(3)"/>
+		<mx:CheckBox label="Nasal" id="CBnasal" fontFamily="Times New Roman" fontSize="16" width="84" top="469" left="10" click="via(4)"/>
+		<mx:CheckBox id="CBcutmuc" fontFamily="Times New Roman" fontSize="16" label="Cutânea/mucosa" width="146" top="358" left="10" click="via(1)"/>
+		<mx:CheckBox label="Oral" id="CBoral" fontFamily="Times New Roman" fontSize="16" width="112" top="323" left="10" click="via(0)"/>
+		<mx:CheckBox label="Retal" id="CBretal" fontFamily="Times New Roman" fontSize="16" width="88" top="395" left="228" click="via(7)"/>
+		<mx:CheckBox label="Vaginal" id="CBvaginal" fontFamily="Times New Roman" fontSize="16" width="97" top="432" left="228" click="via(8)"/>
+		<mx:CheckBox label="Ignorada" id="CBignoradaVia" fontFamily="Times New Roman" fontSize="16" width="97" top="469" left="228" click="via(9)"/>
+		<mx:CheckBox id="CBocular" fontFamily="Times New Roman" fontSize="16" label="Ocular" width="88" top="358" left="228" click="via(6)"/>
+		<mx:CheckBox label="Intramuscular" id="CBintmusc" fontFamily="Times New Roman" fontSize="16" width="123" top="323" left="228" click="via(5)"/>
+		<mx:TextInput width="566" id="TIoutro" fontFamily="Times New Roman" fontSize="16" top="226" left="93" height="29" editable="false"/>
+		<mx:TextInput width="153" id="TItipodec" fontFamily="Times New Roman" fontSize="16" top="261" left="910" height="29"/>
+		<mx:CheckBox label="Hora" id="CBtipohoradec" fontFamily="Times New Roman" fontSize="16" top="228" left="1215" width="66" click="tempoDecorrido(1)"/>
+		<mx:CheckBox label="Minuto" id="CBtipomindec" fontFamily="Times New Roman" fontSize="16" top="228" left="1124" width="76" click="tempoDecorrido(0)"/>
+		<mx:CheckBox label="Mês" id="CBtipomesdec" fontFamily="Times New Roman" fontSize="16" top="261" left="1071" width="52" click="tempoDecorrido(3)"/>
+		<mx:CheckBox label="Dia" id="CBtipodiadec" fontFamily="Times New Roman" fontSize="16" top="261" width="52" left="1145" click="tempoDecorrido(2)"/>
+		<mx:CheckBox label="Ano" id="CBtipoanodec" fontFamily="Times New Roman" fontSize="16" top="261" width="57" left="1215" click="tempoDecorrido(4)"/>
+		<mx:Label text="Duração da exposição:" id="LBduraexp" fontFamily="Times New Roman" fontSize="16" width="153" height="25" top="323" left="910"/>
+		<mx:TextInput width="153" id="TItipodura" fontFamily="Times New Roman" fontSize="16" top="356" left="910" height="29"/>
+		<mx:CheckBox label="Hora" id="CBtipohoradura" fontFamily="Times New Roman" fontSize="16" top="323" left="1215" width="66" click="duracao(1)"/>
+		<mx:CheckBox label="Minuto" id="CBtipomindura" fontFamily="Times New Roman" fontSize="16" top="323" left="1121" width="76" click="duracao(0)"/>
+		<mx:CheckBox label="Mês" id="CBtipomesdura" fontFamily="Times New Roman" fontSize="16" top="356" left="1071" width="52" click="duracao(3)"/>
+		<mx:CheckBox label="Dia" id="CBtipodiadura" fontFamily="Times New Roman" fontSize="16" top="356" width="52" left="1145" click="duracao(2)"/>
+		<mx:CheckBox label="Ano" id="CBtipoanodura" fontFamily="Times New Roman" fontSize="16" top="356" width="57" left="1215" click="duracao(4)"/>
+		<ns1:ButtonEnter label="Próximo" fontWeight="bold" id="BTnext" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" verticalCenter="220" fontFamily="Times New Roman" fontSize="16" width="121" height="29" click="BTproximo()" right="10"/>
+		<ns1:ButtonEnter label="Voltar" fontWeight="bold" id="BTant" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" verticalCenter="220" fontFamily="Times New Roman" fontSize="16" width="121" height="29" click="BTvoltar()" left="10"/>
+
+	</mx:Panel>
+</mx:Panel>	
+</mx:Canvas>

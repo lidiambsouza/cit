@@ -1,0 +1,447 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNresumo" xmlns:ns1="*" initialize="inicio()" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	
+<mx:RemoteObject id="cadres" destination="amfphp" source="php.CadastroResumo" fault="FalhaObRemot(event)">
+		
+		<mx:method name="UpdateBancoR" result="UpdateBancoR(event)" fault="FalhaMet(event)" />			
+		</mx:RemoteObject>
+		
+<mx:RemoteObject id="consultpaci" destination="amfphp" source="php.ConsultarPaciente" fault="FalhaObRemot(event)">
+		<mx:method name="SelectBancoR" result="SelectBancoR(event)" fault="FalhaMet(event)" />
+		<mx:method name="SelectBancoRb" result="SelectBancoRb(event)" fault="FalhaMet(event)" />
+		
+		</mx:RemoteObject>
+		
+
+	
+	<mx:Script>
+		<![CDATA[
+		//<mx:method name="UpdateBancoR" result="UpdateBancoR(event)" fault="FalhaMet(event)" />	
+		//
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.RadioButton;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.events.ItemClickEvent;
+			
+			[Bindable]
+			public var IDpaciente:int;
+			
+			[Bindable]
+			public var evolucaoEscolhida:String;
+			
+			[Bindable]
+			public var gravidadeEscolhida:String;
+			
+			public var manifestacaoclinS:String;			
+			public var analisetoxiS:String;
+			public var internacaoS:String;
+			
+			
+			
+		protected function FalhaMet(e:FaultEvent):void{// função para falha de metodo
+		
+				Alert.show(e.message.toString());
+		}
+		protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+		}
+			
+			
+		private function  inicio():void{
+				limpaForm();
+			consultpaci.SelectBancoR(IDpaciente);
+					
+		}
+				
+		protected function tipoOpcao(op:String, gp:RadioButtonGroup):void{
+			switch(op){
+			case "Sim":
+				var myRB:RadioButton = gp.getRadioButtonAt(0);
+				myRB.selected=true; 
+				
+			break;
+			
+			case "Não":
+				var myRB2:RadioButton = gp.getRadioButtonAt(1);
+				myRB2.selected=true; 
+			break;
+			
+			case "Ignorada":
+				var myRB3:RadioButton = gp.getRadioButtonAt(2);
+				myRB3.selected=true; 
+			break;
+
+			}
+		}
+		
+		protected function SelectBancoRb(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				if(s==false){
+					TIdiagdefin.text="";
+				}else{
+					TIdiagdefin.text=s;
+				}
+			}
+		
+		protected function SelectBancoR(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				var arR:Array= s.split(",");
+				//LBmanifestacaoclinR.text=arR[2];
+				tipoOpcao(arR[2],manifestacaoclin);
+				selecionaOpcao("manifestacaoclin",arR[2]);
+				//LBanalisetoxiR.text=arR[3];
+				tipoOpcao(arR[3],analisetoxi);
+				selecionaOpcao("analisetoxi",arR[3]);
+				//LBinternacaoR.text=arR[4];
+				tipoOpcao(arR[4],internacao);
+				selecionaOpcao("internacao",arR[4]);
+				
+				TIespecificar.text=arR[5];
+				//LBevolucaoR.text=arR[6];
+				switch(arR[6]){
+					case"Cura":
+						evolucao(0);
+					break;
+					case"Cura não confirmada":
+						evolucao(1);
+					break;
+					case"Seqüela":
+						evolucao(2);
+					break;
+					case"Óbito":
+						evolucao(3);
+					break;
+					case"Óbito outra causa":
+						evolucao(4);
+					break;
+					case"Ignorada":
+						evolucao(5);
+					break;
+					case"Outro":
+						evolucao(6);
+					break;					
+				}
+				
+				TIoutro.text=arR[7];
+				consultpaci.SelectBancoRb(IDpaciente);
+				//TIdiagdefinR.text=arR[8];
+				TIcid10.text=arR[8];
+				//LBgravidadeR.text=arR[9];
+				switch(arR[9]){
+					case"Leve":
+						gravidade(0);
+					break;
+					case"Moderado":
+						gravidade(1);
+					break;
+					case"Grave":
+						gravidade(2);
+					break;
+				}
+				//LBdataEvoR.text=dataformatar(arR[10]);
+				//LBgpagenteR.text=arR[11];
+				//consultpaci.SelectBancoV(ar[0]);
+				//TAevoluObs.text=arR[11];
+			}
+		
+		protected function limpaForm():void{
+			//TIbuscanomeS.text="";
+		}
+		protected function UpdateBancoR(evt:ResultEvent):void{
+			if(evt.result.toString()=="false"){
+				Alert.show("Erro! Dados não cadastrados!");
+				
+			}else{
+				proximoTela();
+			}
+			
+		}
+		
+		protected function proximoTela():void{
+			
+			
+				Alert.show("Paciente cadastrado!");
+				removeAllChildren();
+				var telaC:BuscaPacienteEDT = new BuscaPacienteEDT();				
+				addChild(telaC as DisplayObject);
+			
+			
+		}
+		protected function selecionaOpcao(gp:String,trat:String):void{
+			//fazer um switch pegar o gp. e add variavel global = trat
+			switch(gp){
+				case "manifestacaoclin":
+                       manifestacaoclinS=trat;
+                       
+                	break;
+                case "analisetoxi":
+                       analisetoxiS=trat;
+                       
+                    break;
+                case "internacao":
+                       internacaoS=trat;
+                      
+                break;          
+                
+            }
+			
+		}
+		
+		protected function opcao(evt:ItemClickEvent):void{
+			switch (evt.currentTarget.selectedValue) {
+                    case "Sim":
+                        //Alert.show("inicial");
+                        var grupoA:String=evt.currentTarget.selection.groupName;
+                        selecionaOpcao(grupoA,"Sim");
+                        break;
+                    case "Não":
+                       // Alert.show("proposto");
+                        var grupoB:String=evt.currentTarget.selection.groupName;
+                        selecionaOpcao(grupoB,"Não");
+                        break;
+                    case "Ignorada":
+                       // Alert.show("realizado");
+                        var grupoC:String=evt.currentTarget.selection.groupName;
+                        selecionaOpcao(grupoC,"Ignorada");
+                        break;
+                     default:
+                     	var grupoD:String=evt.currentTarget.selection.groupName;
+                        selecionaOpcao(grupoD,"");
+                        break;
+                }
+		}
+		protected function evolucao(flag:int):void{
+			switch(flag.toString()){
+				case "0":
+				{
+					CBcura.selected=true;
+					CBcuranconfir.selected=false;
+					CBsequela.selected=false;
+					CBobito.selected=false;
+					CBobitocausa.selected=false;
+					CBignorada.selected=false;
+					CBoutro.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					evolucaoEscolhida=CBcura.label;
+					break;
+				}
+				case "1":
+				{
+					CBcura.selected=false;
+					CBcuranconfir.selected=true;
+					CBsequela.selected=false;
+					CBobito.selected=false;
+					CBobitocausa.selected=false;
+					CBignorada.selected=false;
+					CBoutro.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					evolucaoEscolhida=CBcuranconfir.label;
+					break;
+				}
+				case "2":
+				{
+					CBcura.selected=false;
+					CBcuranconfir.selected=false;
+					CBsequela.selected=true;
+					CBobito.selected=false;
+					CBobitocausa.selected=false;
+					CBignorada.selected=false;
+					CBoutro.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					evolucaoEscolhida=CBsequela.label;
+					break;
+				}
+				case "3":
+				{
+					CBcura.selected=false;
+					CBcuranconfir.selected=false;
+					CBsequela.selected=false;
+					CBobito.selected=true;
+					CBobitocausa.selected=false;
+					CBignorada.selected=false;
+					CBoutro.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					evolucaoEscolhida=CBobito.label;
+					break;
+				}
+				case "4":
+				{
+					CBcura.selected=false;
+					CBcuranconfir.selected=false;
+					CBsequela.selected=false;
+					CBobito.selected=false;
+					CBobitocausa.selected=true;
+					CBignorada.selected=false;
+					CBoutro.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					evolucaoEscolhida=CBobitocausa.label;
+					break;
+				}
+				case "5":
+				{
+					CBcura.selected=false;
+					CBcuranconfir.selected=false;
+					CBsequela.selected=false;
+					CBobito.selected=false;
+					CBobitocausa.selected=false;
+					CBignorada.selected=true;
+					CBoutro.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					evolucaoEscolhida=CBignorada.label;
+					break;
+				}
+				case "6":
+				{
+					CBcura.selected=false;
+					CBcuranconfir.selected=false;
+					CBsequela.selected=false;
+					CBobito.selected=false;
+					CBobitocausa.selected=false;
+					CBignorada.selected=false;
+					CBoutro.selected=true;
+					TIoutro.editable=true;
+					
+					evolucaoEscolhida=CBoutro.label;
+					break;
+				}
+				
+				default:
+				{
+					CBcura.selected=false;
+					CBcuranconfir.selected=false;
+					CBsequela.selected=false;
+					CBobito.selected=false;
+					CBobitocausa.selected=false;
+					CBignorada.selected=false;
+					CBoutro.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					evolucaoEscolhida="";					
+					break;
+				}
+			
+			}		
+		}
+		protected function gravidade(flag:int):void{
+			switch(flag.toString()){
+				case "0":
+				{
+					CBleve.selected=true;
+					CBmoderado.selected=false;
+					CBgrave.selected=false;			
+					
+					gravidadeEscolhida=CBleve.label;
+					break;
+				}
+				case "1":
+				{
+					CBleve.selected=false;
+					CBmoderado.selected=true;
+					CBgrave.selected=false;	
+					
+					gravidadeEscolhida=CBmoderado.label;
+					break;
+				}
+				case "2":
+				{
+					CBleve.selected=false;
+					CBmoderado.selected=false;
+					CBgrave.selected=true;	
+					
+					gravidadeEscolhida=CBgrave.label;
+					break;
+				}
+				
+				default:
+				{
+					CBleve.selected=false;
+					CBmoderado.selected=false;
+					CBgrave.selected=false;	
+					
+					gravidadeEscolhida="";					
+					break;
+				}
+			
+			}
+		}
+        protected function BTsalvar():void{
+        	
+        		cadres.UpdateBancoR(IDpaciente,manifestacaoclinS,analisetoxiS,internacaoS,TIespecificar.text,evolucaoEscolhida,TIoutro.text,TIdiagdefin.text,TIcid10.text,gravidadeEscolhida);
+        	
+        }
+        
+        protected function BTvoltar():void{
+			removeAllChildren();
+			var tela:TratamentoEDT =new TratamentoEDT();			
+			tela.IDpaciente=IDpaciente;
+			
+			addChild(tela as DisplayObject);
+		}
+            
+				
+				]]>
+	</mx:Script>	
+	
+	
+	
+<mx:Panel horizontalScrollPolicy="auto" verticalScrollPolicy="auto" id="PNmain" horizontalCenter="0" verticalCenter="0" width="96%" height="90%" layout="absolute">	
+	
+	<mx:Panel width="1300" height="690" layout="absolute" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNResumo" title="Resumo" fontFamily="Times New Roman" fontSize="16" left="0" top="0">
+		<mx:RadioButtonGroup id="manifestacaoclin" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="analisetoxi" itemClick="opcao(event);"/>
+		<mx:RadioButtonGroup id="internacao" itemClick="opcao(event);"/>
+				
+		<mx:RadioButton label="Sim" groupName="manifestacaoclin" top="10" left="150" id="RBa" value="Sim"/>
+		<mx:RadioButton label="Não" groupName="manifestacaoclin" top="10" left="220" id="RBb" value="Não"/>
+		<mx:RadioButton label="Ignorada" groupName="manifestacaoclin" top="10" left="280" id="RBc" value="Ignorada"/>
+		<mx:Label text="Manifestação clínica" id="LBmanifestacaoclin" fontFamily="Times New Roman" fontSize="16" width="132" height="25" top="10" left="10"/>
+		<mx:RadioButton label="Sim" groupName="analisetoxi" top="40" left="150" id="RBa0" value="Sim"/>
+		<mx:RadioButton label="Não" groupName="analisetoxi" top="40" left="220" id="RBb0" value="Não"/>
+		<mx:RadioButton label="Ignorada" groupName="analisetoxi" top="40" left="280" id="RBc0" value="Ignorada"/>
+		<mx:RadioButton label="Sim" top="70" left="150" id="RBa1" value="Sim" groupName="internacao"/>
+		<mx:RadioButton label="Não" top="70" left="220" id="RBb1" value="Não" groupName="internacao"/>
+		<mx:RadioButton label="Ignorada" top="70" left="280" id="RBc1" value="Ignorada" groupName="internacao"/>
+		<mx:Label text="Análise toxicológica" id="LBanalisetoxi" fontFamily="Times New Roman" fontSize="16" width="132" height="25" top="40" left="10"/>
+		<mx:Label text="Internação" id="LBinternacao" fontFamily="Times New Roman" fontSize="16" width="132" height="25" top="70" left="10"/>
+		<mx:Label text="Especificar:" id="LBespecificar" fontFamily="Times New Roman" fontSize="16" width="80" height="25" top="70" left="370"/>
+		<mx:TextInput id="TIespecificar" fontFamily="Times New Roman" fontSize="16" top="70" height="29" editable="true" width="500" left="460"/>
+		<mx:TextInput id="TIoutro" fontFamily="Times New Roman" fontSize="16" top="150" height="29" editable="false" width="618" left="190"/>
+		<mx:TextInput id="TIdiagdefin" fontFamily="Times New Roman" fontSize="16" top="230" height="29" editable="true" width="781" left="179"/>
+		<mx:TextInput id="TIcid10" fontFamily="Times New Roman" fontSize="16" top="230" height="29" editable="true" right="10" width="230"/>
+		<mx:Label text="Evolução:" id="LBevolucao0" fontFamily="Times New Roman" fontSize="16" height="25" top="120" left="10" width="82"/>
+		<mx:Label text="Diagnóstico definitivo:" id="LBdiagdefin" fontFamily="Times New Roman" fontSize="16" height="25" top="230" left="10" width="161"/>
+		<mx:Label text="C.I.D 10:" id="LBcid10" fontFamily="Times New Roman" fontSize="16" height="25" top="230" right="240" width="71"/>
+		<mx:CheckBox label="Seqüela" id="CBsequela" fontFamily="Times New Roman" fontSize="16" top="120" click="evolucao(2)" left="360" width="90"/>
+		<mx:CheckBox label="Grave" id="CBgrave" fontFamily="Times New Roman" fontSize="16" top="270" click="gravidade(2)" left="490" width="80"/>
+		<mx:CheckBox label="Óbito" id="CBobito" fontFamily="Times New Roman" fontSize="16" top="120" click="evolucao(3)" left="470" width="67"/>
+		<mx:CheckBox label="Óbito outra causa" id="CBobitocausa" fontFamily="Times New Roman" fontSize="16" top="120" click="evolucao(4)" height="29" left="550" width="151"/>
+		<mx:CheckBox label="Ignorada" id="CBignorada" fontFamily="Times New Roman" fontSize="16" top="120" click="evolucao(5)" height="29" left="710" width="98"/>
+		<mx:CheckBox id="CBcuranconfir" fontFamily="Times New Roman" fontSize="16" label="Cura não confirmada" top="120" click="evolucao(1)" width="152" height="29" left="190"/>
+		<mx:Label text="Gravidade (Se por animal peçonhento):" id="LBgravidade" fontFamily="Times New Roman" fontSize="16" height="25" top="270" left="10" width="262"/>
+		<mx:CheckBox id="CBmoderado" fontFamily="Times New Roman" fontSize="16" label="Moderado" top="270" click="gravidade(1)" width="105" height="29" left="370"/>
+		<mx:CheckBox label="Leve" id="CBleve" fontFamily="Times New Roman" fontSize="16" top="270" click="gravidade(0)" height="29" left="280" width="71"/>
+		<mx:CheckBox label="Cura" id="CBcura" fontFamily="Times New Roman" fontSize="16" top="120" click="evolucao(0)" height="29" left="100" width="71"/>
+		<mx:CheckBox label="Outro" id="CBoutro" fontFamily="Times New Roman" fontSize="16" top="150" click="evolucao(6)" height="29" left="100" width="71"/>
+		<ns1:ButtonEnter label="Salvar" fontWeight="bold" id="BTSalv" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" verticalCenter="220" fontFamily="Times New Roman" fontSize="16" width="121" height="29" click="BTsalvar()" right="10"/>
+		<ns1:ButtonEnter label="Voltar" fontWeight="bold" id="BTant" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" verticalCenter="220" fontFamily="Times New Roman" fontSize="16" width="121" height="29" click="BTvoltar()" left="10"/>
+		
+	</mx:Panel>
+</mx:Panel>	
+</mx:Canvas>

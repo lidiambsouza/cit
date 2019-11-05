@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>	
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNresumoObs" xmlns:ns1="*" initialize="inicio()" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+<mx:RemoteObject id="cadres" destination="amfphp" source="php.CadastroResumo" fault="FalhaObRemot(event)">
+		
+		<mx:method name="UpdateBancoRb" result="UpdateBancoRb(event)" fault="FalhaMet(event)" />			
+		</mx:RemoteObject>
+	<mx:RemoteObject id="consultpaci" destination="amfphp" source="php.ConsultarPaciente" fault="FalhaObRemot(event)">
+		
+		<mx:method name="SelectBancoV" result="SelectBancoV(event)" fault="FalhaMet(event)" />
+		
+	</mx:RemoteObject>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.events.ItemClickEvent;
+			
+			[Bindable]
+			public var IDpaciente:int;
+			[Bindable]
+			public var ObservacaoI:String;
+			
+			
+			
+			
+			
+		protected function FalhaMet(e:FaultEvent):void{// função para falha de metodo
+		
+				Alert.show(e.message.toString());
+		}
+		protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+		}
+			
+			
+		private function  inicio():void{
+				//limpaForm();
+				consultpaci.SelectBancoV(IDpaciente);
+				
+				
+		}				
+		protected function SelectBancoV(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				if(s){
+					TAobservacao.text=s;
+				}else{
+					TAobservacao.text="";
+				}
+		}
+		
+		protected function proximoTela():void{
+			
+				removeAllChildren();
+				var tela:LocalExposicaoEDT= new LocalExposicaoEDT();
+				tela.IDpaciente=IDpaciente;			
+				addChild(tela as DisplayObject);		
+			
+			
+		}
+		
+		protected function BTvoltar():void{
+			removeAllChildren();
+			var tela:SolicitanteEDT = new SolicitanteEDT();
+			tela.IDpaciente=IDpaciente;			
+			addChild(tela as DisplayObject);
+		}
+		
+		
+		
+		protected function UpdateBancoRb(evt:ResultEvent):void{
+			if(evt.result.toString()=="false"){
+				Alert.show("Erro! Dados não cadastrados!");
+				
+			}else{
+				proximoTela();
+			}
+			
+		}
+		
+        protected function BTproximo():void{
+        	
+        		cadres.UpdateBancoRb(IDpaciente,TAobservacao.text);
+        	
+        }
+            
+				
+				]]>
+	</mx:Script>	
+	
+	
+	
+<mx:Panel horizontalScrollPolicy="auto" verticalScrollPolicy="auto" id="PNmain" horizontalCenter="0" verticalCenter="0" width="96%" height="90%" layout="absolute">	
+	
+	<mx:Panel width="1300" height="690" layout="absolute" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNobservacao" title="Observacao" fontFamily="Times New Roman" fontSize="16" left="0" top="0">
+		
+		<mx:Label text="Observação:" id="LBobservacao" fontFamily="Times New Roman" fontSize="16" height="25" top="10" left="10" width="132"/>
+		<mx:TextArea left="10" right="10" top="45" bottom="135" id="TAobservacao"/>
+		<ns1:ButtonEnter label="Próximo" fontWeight="bold" id="BTnext" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" verticalCenter="220" fontFamily="Times New Roman" fontSize="16" width="121" height="29" click="BTproximo()" right="10"/>
+		<ns1:ButtonEnter label="Voltar" fontWeight="bold" id="BTant" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" verticalCenter="220" fontFamily="Times New Roman" fontSize="16" width="121" height="29" click="BTvoltar()" left="10"/>
+	</mx:Panel>
+</mx:Panel>	
+</mx:Canvas>

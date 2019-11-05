@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNevolucao" xmlns:ns1="*" initialize="inicio()" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	
+<mx:RemoteObject id="cadevo" destination="amfphp" source="php.CadastroEvolucao" fault="FalhaObRemot(event)">
+		<mx:method name="preenche" result="preencheR(event)" fault="FalhaMet(event)" />
+		<mx:method name="InsertBancoEV" result="InsertBancoEVR(event)" fault="FalhaMet(event)" />
+		<mx:method name="preencheData" result="preencheDataR(event)" fault="FalhaMet(event)" />
+		<mx:method name="preencheGP" result="preencheGPR(event)" fault="FalhaMet(event)" />
+	</mx:RemoteObject>
+	
+	
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			[Bindable]
+			public var resulBdados:String;
+			[Bindable]
+			public var ar:Array;
+			
+			
+		protected function FalhaMet(e:FaultEvent):void{// função para falha de metodo
+		
+				Alert.show(e.message.toString());
+		}
+		protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+		}
+			
+			
+		private function  inicio():void{
+				limpaForm();
+				ar= resulBdados.split(",");
+				camposPree(ar);
+		}
+		
+		protected function camposPree(ary:Array):void{
+				TInomepaciente.text=ary[1];
+				TInumeroID.text=ary[6];
+				cadevo.preenche(ary[0]);
+				cadevo.preencheData(ary[0]);
+				cadevo.preencheGP(ary[0]);
+		}
+		protected function preencheR(et:ResultEvent):void{
+			var st:String= et.result.toString();
+			TAevolucao.text=st;
+		}
+		protected function preencheDataR(et:ResultEvent):void{
+			var st:String= et.result.toString();
+			DFdata.text=st.substr(8,2)+"/"+st.substr(5,2)+"/"+st.substr(0,4);
+		}
+		protected function preencheGPR(et:ResultEvent):void{
+			var st:String= et.result.toString();
+			TIgpagente.text=st;
+		}
+		protected function InsertBancoEVR(evt:ResultEvent):void{
+			//Alert.show(evt.result.toString());
+			if(evt.result.toString()=="false"){
+				Alert.show("Erro! Dados não cadastrados!");
+				
+			}else{
+				//IDpacientBanco=parseInt(evt.result.toString());
+				//Alert.show(IDpacientBanco.toString());
+				proximoTela();
+			}
+			
+		}
+		protected function proximoTela():void{
+			
+				Alert.show("Evolução cadastrado!");
+				removeAllChildren();
+				var telaC:BuscaPaciente= new BuscaPaciente();
+				telaC.buOUevo=false;
+				//tela.IDpaciente=IDpaciente;
+				addChild(telaC as DisplayObject);
+			
+			
+		}
+		
+		protected function limpaForm():void{
+			//TIbuscanomeS.text="";
+		}
+		protected function dataformatar(dt:String):String{
+			var st:String=dt.substr(6,4)+dt.substr(3,2)+dt.substr(0,2);//yyyymmdd
+			return st;
+		
+		}
+			
+        protected function BTsalvar():void{
+        	cadevo.InsertBancoEV(ar[0],TAevolucao.text,dataformatar(DFdata.text),TIgpagente.text);
+        }   
+            
+				
+				]]>
+	</mx:Script>	
+	
+	
+	
+	
+<mx:Panel width="96%" height="90%" horizontalCenter="0" verticalCenter="0" id="PNmain" horizontalScrollPolicy="auto" verticalScrollPolicy="auto" layout="absolute">	
+	<mx:Panel width="1300" height="690" layout="absolute" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNevolucao" title="Evolução" fontFamily="Times New Roman" fontSize="16" horizontalScrollPolicy="off" verticalScrollPolicy="off" left="0" top="0" x="0" y="0">
+		<mx:Label text="Nome:" id="LBnomepaciente" fontFamily="Times New Roman" fontSize="16" width="66" left="10" top="10" height="25"/>
+		<mx:TextInput width="737" id="TInomepaciente" fontFamily="Times New Roman" fontSize="16" top="10" left="84" height="29" editable="false"/>
+		<mx:Label text="Grupo do agente tóxico:" id="LBgpagente" fontFamily="Times New Roman" fontSize="16" width="161" left="10" top="60" height="25"/>
+		<mx:TextInput width="642" id="TIgpagente" fontFamily="Times New Roman" fontSize="16" top="60" left="179" height="29"/>
+		<mx:Label text="Data:" id="LBdata" fontFamily="Times New Roman" fontSize="16" left="900" width="52" top="10"/>
+		<mx:Label text="Número:" id="LBnumeroUnico" fontFamily="Times New Roman" fontSize="16" width="87" right="256" height="25" top="60"/>
+		<mx:TextInput width="238" id="TInumeroID" fontFamily="Times New Roman" fontSize="16" right="10" height="29" top="60" editable="false"/>
+		<mx:DateField left="960" width="160" id="DFdata" fontFamily="Times New Roman" fontSize="16" height="29" dayNames="['D', 'S', 'T', 'Q', 'Q', 'S', 'S']" monthNames="['Janeiro', 'Fevereiro','Março', 'Abril', 'Maio','Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro','Dezembro']" formatString="DD/MM/YYYY" top="10"/>
+		<mx:TextArea left="10" right="10" top="130" id="TAevolucao" bottom="150"/>
+		<ns1:ButtonEnter label="Salvar" fontWeight="bold" id="BTsalve" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" horizontalCenter="0" verticalCenter="225" fontFamily="Times New Roman" fontSize="16" width="121" height="29" click="BTsalvar()"/>
+
+	</mx:Panel>
+</mx:Panel>	
+</mx:Canvas>

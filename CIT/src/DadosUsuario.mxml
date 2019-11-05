@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNsobre" xmlns:ns1="*" initialize="inicio()">
+	
+	<mx:RemoteObject id="dadusu" destination="amfphp" source="php.DadosUsuario" fault="FalhaObRemot(event)">
+		<mx:method name="dadosUsu" result="dadosUsu(event)" fault="FalhaMet(event)" />
+		
+	</mx:RemoteObject>
+			
+	<mx:Script>
+	<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.events.DropdownEvent;
+			
+			 protected var perfilEscolhido:int;
+			
+			[Bindable]
+			public var resulBdados:String;
+			
+			[Bindable]
+			public var ar:Array;
+			
+			[Bindable]
+			public var perfil:ArrayCollection = new ArrayCollection(
+                [ {label:"Selecione o perfil do usuario...", data:0},
+                  {label:"Administrador", data:1}, 
+                  {label:"Editor", data:2}, 
+                  {label:"Consultor", data:3} ]);
+
+			
+			
+			private function  inicio():void{
+				//Alert.show(resulBdados);
+				ar= resulBdados.split(",");
+				//Alert.show(ar[4]);
+				camposPree(ar);
+			}
+			
+			protected function FalhaMet(e:FaultEvent):void// função para falha de metodo
+			{
+				Alert.show(e.message.toString());
+			}
+			protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+			}
+			
+			protected function camposPree(ary:Array):void{
+				TInome.text=ary[1];
+				TIlotacao.text=ary[2];
+				TIramal.text=ary[3];
+				TIemail.text=ary[4];
+				TIspark.text=ary[5];
+			}
+			
+			protected function CBperfilEscolha(evt:DropdownEvent):void{
+				perfilEscolhido = ComboBox(evt.target).selectedItem.data;
+				
+			}
+			
+			protected function dadosUsu(ev:ResultEvent):void{
+				var re:String = ev.result.toString();
+				//Alert.show(re);
+				if(re == "33"){
+					Alert.show("Email invalido!");
+				}else{
+					if(re == "true"){
+						Alert.show("Dados de usuario editado com sucesso!");
+						removeAllChildren();
+						addChild(new BuscaUS as DisplayObject);
+					}else{
+						Alert.show("Erro ao editar os dados de usuario!");
+					}
+				}
+			}
+			
+			protected function BTeditar():void{
+				var nome:String;
+				var lotacao:String;
+				var ramal:String;
+				var email:String;
+				var spark:String;
+				var perfil:String;
+				
+				if(TInome.text==ar[1]){
+					nome="";
+				}else{
+					nome=TInome.text;
+				}
+				
+				if(TIlotacao.text==ar[2]){
+					lotacao="";
+				}else{
+					lotacao=TIlotacao.text;
+				}
+				
+				if(TIramal.text==ar[3]){
+					ramal="";
+				}else{
+					ramal=TIramal.text;
+				}
+				
+				if(TIemail.text==ar[4]){
+					email="";
+				}else{
+					email=TIemail.text;
+				}
+				
+				if(TIspark.text==ar[5]){
+					spark="";
+				}else{
+					spark=TIspark.text;
+				}
+				if(CBperfil.selectedIndex==0){
+					perfil="";
+				}else{
+					perfil=perfilEscolhido.toString();
+					
+				}
+				//Alert.show(spark);
+				dadusu.dadosUsu(ar[0], nome,perfil, lotacao, ramal, email, spark);
+			}
+			
+			
+			
+			
+	]]>
+	</mx:Script>		
+			
+			
+	
+	<mx:Panel width="96%" height="90%" layout="absolute" horizontalCenter="0" verticalCenter="0" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNcadastusuario" title="Cadastro de usúario" fontFamily="Times New Roman" fontSize="16">
+		<mx:Label y="32" text="Nome:" fontFamily="Times New Roman" fontSize="16" id="LBnome" left="50" width="55"/>
+		<mx:TextInput x="137" y="30" width="75%" fontFamily="Times New Roman" fontSize="16" id="TInome"/>
+		<mx:TextInput x="137" y="123" width="60%" fontFamily="Times New Roman" fontSize="16" id="TIlotacao"/>
+		<mx:TextInput x="137" y="157" width="60%" fontFamily="Times New Roman" fontSize="16" id="TIramal"/>
+		<mx:TextInput x="137" y="192" width="60%" fontFamily="Times New Roman" fontSize="16" id="TIemail"/>
+		<mx:TextInput x="137" y="226" width="60%" fontFamily="Times New Roman" fontSize="16" id="TIspark"/>
+		<mx:Label y="230" text="Spark:" fontFamily="Times New Roman" fontSize="16" id="Lbspark" left="53" width="52"/>
+		<mx:Label y="196" text="Email:" fontFamily="Times New Roman" fontSize="16" id="LBemail" left="53" width="52"/>
+		<mx:Label y="161" text="Ramal:" fontFamily="Times New Roman" fontSize="16" id="LBramal" left="53" width="52"/>
+		<mx:Label y="73" text="Perfil:" fontFamily="Times New Roman" fontSize="16" id="LBperfil" left="50" width="55"/>
+		<mx:ComboBox x="137" y="71" width="30%" fontFamily="Times New Roman" fontSize="16" id="CBperfil" dataProvider="{perfil}" close="CBperfilEscolha(event)"></mx:ComboBox>
+		<mx:Label y="127" text="Lotação:" fontFamily="Times New Roman" fontSize="16" id="LBlotacao" left="53" width="64"/>
+		<mx:Label y="275" text="¹Campos com * são de preenchimento obrigatorio." fontFamily="Times New Roman" fontSize="16" id="LBobservacao" left="53" width="346"/>
+		
+		
+		<ns1:ButtonEnter label="Editar" fontWeight="bold" id="BTeditarusu" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" horizontalCenter="0" verticalCenter="225" click="BTeditar()" fontFamily="Times New Roman" fontSize="16"/>
+	</mx:Panel>
+	
+</mx:Canvas>
+

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TextInput xmlns:mx="http://www.adobe.com/2006/mxml" 
+focusOut="checaHora()" restrict="0-9:">
+<mx:Script>
+<![CDATA[
+	import mx.controls.Alert;
+	
+	private function checaHora():void {
+		if(this.text.length == 0){
+			return;
+		}
+		if(this.text.length == 4) {
+			this.text = '0'+this.text;
+		}
+		if(int(this.text.substr(0,2)) > 23 || this.text.substr(2,1) != ":" || int(this.text.substr(3,2)) > 59 ) {
+			Alert.show("A horário está incorreto, utilize o formato 0:00 a 23:59.","Informação");
+			this.text = "00:00";
+			return;
+		}
+	}
+
+]]>
+</mx:Script>
+</mx:TextInput>

@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNbuscaformulario" xmlns:ns1="*" initialize="inicio()" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+	
+	<mx:RemoteObject id="cadsoli" destination="amfphp" source="php.CadastroSolicitante" fault="FalhaObRemot(event)">
+		<mx:method name="InsertBancoS" result="InsertBancoS(event)" fault="FalhaMet(event)" />
+		<mx:method name="UpdateBancoS" result="UpdateBancoS(event)" fault="FalhaMet(event)" />
+			
+		</mx:RemoteObject>
+
+	<mx:RemoteObject id="consultpaci" destination="amfphp" source="php.ConsultarPaciente" fault="FalhaObRemot(event)">
+		<mx:method name="SelectBancoS" result="SelectBancoS(event)" fault="FalhaMet(event)" />
+		<mx:method name="SelectExist" result="SelectExist(event)" fault="FalhaMet(event)" />	
+		</mx:RemoteObject>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.events.DropdownEvent;
+			import mx.utils.StringUtil;
+			
+			[Bindable]
+			public var cadOUBusc:Boolean;
+			[Bindable]
+			public var UsuarioLogin:String;
+			
+			[Bindable]
+			public var Volta:Boolean;
+			
+			protected var estadoEscolhido:String;
+			
+			[Bindable]
+			public var IDpaciente:int;
+			
+			[Bindable]
+			public var estado:ArrayCollection = new ArrayCollection(
+                [ {label:"Selecione o Estado...", data:0},{label:"Acre", data:1},
+                	{label:"Alagoas", data:2},{label:"Amapá", data:3},
+                	{label:"Amazonas", data:4},{label:"Bahia", data:5},
+                	{label:"Ceará", data:6},{label:"Distrito Federal", data:7},
+                	{label:"Espírito Santo", data:8},{label:"Goiás", data:9},
+                	{label:"Maranhão", data:10},{label:"Mato Grosso", data:11},
+                	{label:"Mato Grosso do Sul", data:12},{label:"Minas Gerais", data:13},
+                	{label:"Pará", data:14},{label:"Paraíba", data:15},
+                	{label:"Paraná", data:16},{label:"Pernambuco", data:17},
+                	{label:"Piauí", data:18},{label:"Rio de Janeiro", data:19},
+                	{label:"Rio Grande do Norte", data:20},{label:"Rio Grande do Sul", data:21},
+                	{label:"Rondônia", data:22},{label:"Roraima", data:23},
+                	{label:"Santa Catarina", data:24},{label:"São Paulo", data:25},
+                  {label:"Sergipe", data:26},{label:"Tocantins", data:27} ]);
+			
+			
+			
+		protected function FalhaMet(e:FaultEvent):void{// função para falha de metodo
+		
+				Alert.show(e.message.toString());
+		}
+		protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+		}
+			
+			
+		private function  inicio():void{
+				limpaForm();
+				//Alert.show(IDpaciente.toString());
+				consultpaci.SelectExist(IDpaciente,"solicitante");
+				
+		}
+		protected function SelectExist(evt:ResultEvent):void{
+			if(evt.result.toString()=="true"){
+				consultpaci.SelectBancoS(IDpaciente);
+				Volta=true;
+			}else{
+				Volta=false;
+			}
+		}
+		
+		private function findIndex(dp:ArrayCollection, prop:String, what:String ):int {
+			for(var k:int=0; k<dp.length; k++) {
+				if(String(dp.getItemAt(k)[prop])==what) return k;
+			}
+			return -1;
+		}
+		protected function SelectBancoS(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				var arS:Array= s.split(",");
+				
+				TInomeSolicitante.text=arS[2];
+				TIdddS.text=arS[3];
+				TItelefoneS.text=arS[4];
+				TIRamalS.text=arS[5];
+				TIinstituicao.text=arS[6];
+				TIenderecoS.text=arS[10];
+				TInumeroS.text=arS[11];
+				//CBOXEstado.selectedIndex=findIndex(estado,"label",arP[12]);
+				//estadoEscolhido=CBOXEstado.selectedItem.label;
+				CBOXEstadoS.selectedIndex=findIndex(estado,"label",arS[7]);
+				estadoEscolhido=CBOXEstadoS.selectedItem.label;
+				
+				TImunicipioS.text=arS[8];
+				TIbairroS.text=arS[9];
+				
+				//LBcategoriaRS.text=arS[12];				
+				switch(arS[12]){
+					case"Enfermeiro(a)":
+						categoria(0);
+					break;
+					case"Ignorado":
+						categoria(1);
+					break;
+					case"Médico(a)":
+						categoria(2);
+					break;
+					case"Parente":
+						categoria(3);
+					break;
+					case"Próprio":
+						categoria(4);
+					break;
+					case"Outro":
+						categoria(5);
+					break;
+					case"Outro profissional da saúde":
+						categoria(6);
+					break;
+				
+				}
+				
+				TIoutroSaude.text=arS[14];	
+				TIoutro.text=arS[13];
+				
+				
+				
+			}
+		
+		protected function limpaForm():void{
+			//TIbuscanomeS.text="";
+		}
+		
+		protected function InsertBancoS(evt:ResultEvent):void{
+			if(evt.result.toString()=="false"){
+				Alert.show("Erro! Dados não cadastrados!");
+				
+			}else{
+				//IDpacientBanco=parseInt(evt.result.toString());
+				//Alert.show(IDpacientBanco.toString());
+				proximoTela();
+			}
+			
+		}
+		protected function proximoTela():void{
+			removeAllChildren();
+			var tela:Observacao = new Observacao();
+			tela.IDpaciente=IDpaciente;
+			tela.cadOUBusc=cadOUBusc;
+			tela.UsuarioLogin=UsuarioLogin;
+			addChild(tela as DisplayObject);
+		}
+		
+		protected function CampoEmBranco():String{
+			var msg:String="";
+			
+			if(StringUtil.trim(TInomeSolicitante.text)==""){
+				msg="Preencha o campo nome";
+			}else{
+				if(StringUtil.trim(TIinstituicao.text)==""){
+				 	msg="Preencha o campo instituição";
+				 }else{
+				 	if(CBenfermeiro.selected==false && CBign.selected==false && CBmedico.selected==false && CBoutro.selected==false && CBoutroSaude.selected==false && CBparente.selected==false && CBproprio.selected==false){
+				    	msg="Escolha a categoria!"
+				    }else{
+				    
+				    	if(CBOXEstadoS.selectedIndex==0){
+				    		msg="Escolha o estado";
+				    	}
+				 	}
+				 }    
+			}
+				   				
+			return msg;
+		}
+		
+		protected function categoria(flag:int):void{
+			if(flag==0){
+				CBenfermeiro.selected=true;
+				CBign.selected=false;
+				CBmedico.selected=false;
+				CBparente.selected=false;
+				CBproprio.selected=false;
+				CBoutro.selected=false;
+				CBoutroSaude.selected=false;
+				TIoutroSaude.editable=false;
+				TIoutro.editable=false;
+				
+				TIoutroSaude.text="";
+				TIoutro.text="";
+				
+			}else{
+				if(flag==1){
+					CBenfermeiro.selected=false;
+					CBign.selected=true;
+					CBmedico.selected=false;
+					CBparente.selected=false;
+					CBproprio.selected=false;
+					CBoutro.selected=false;
+					CBoutroSaude.selected=false;
+					TIoutroSaude.editable=false;
+					TIoutro.editable=false;
+					
+					TIoutroSaude.text="";
+					TIoutro.text="";
+				
+				}else{
+					if(flag==2){
+						CBenfermeiro.selected=false;
+						CBign.selected=false;
+						CBmedico.selected=true;
+						CBparente.selected=false;
+						CBproprio.selected=false;
+						CBoutro.selected=false;
+						CBoutroSaude.selected=false;
+						TIoutroSaude.editable=false;
+						TIoutro.editable=false;
+						
+						TIoutroSaude.text="";
+						TIoutro.text="";
+				
+					}else{
+						if(flag==3){
+							CBenfermeiro.selected=false;
+							CBign.selected=false;
+							CBmedico.selected=false;
+							CBparente.selected=true;
+							CBproprio.selected=false;
+							CBoutro.selected=false;
+							CBoutroSaude.selected=false;
+							TIoutroSaude.editable=false;
+							TIoutro.editable=false;
+							
+							TIoutroSaude.text="";
+							TIoutro.text="";
+				
+						}else{
+							if(flag==4){
+								CBenfermeiro.selected=false;
+								CBign.selected=false;
+								CBmedico.selected=false;
+								CBparente.selected=false;
+								CBproprio.selected=true;
+								CBoutro.selected=false;
+								CBoutroSaude.selected=false;
+								TIoutroSaude.editable=false;
+								TIoutro.editable=false;
+								
+								TIoutroSaude.text="";
+								TIoutro.text="";
+				
+							}else{
+								if(flag==5){
+									CBenfermeiro.selected=false;
+									CBign.selected=false;
+									CBmedico.selected=false;
+									CBparente.selected=false;
+									CBproprio.selected=false;
+									CBoutro.selected=true;
+									CBoutroSaude.selected=false;
+									TIoutroSaude.editable=false;
+									TIoutro.editable=true;
+									
+									TIoutroSaude.text="";
+									//TIoutro.text="";
+				
+								}else{
+									if(flag==6){
+										CBenfermeiro.selected=false;
+										CBign.selected=false;
+										CBmedico.selected=false;
+										CBparente.selected=false;
+										CBproprio.selected=false;
+										CBoutro.selected=false;
+										CBoutroSaude.selected=true;
+										TIoutro.editable=false;
+										TIoutroSaude.editable=true;
+										
+										//TIoutroSaude.text="";
+										TIoutro.text="";
+													
+									}else{
+										CBenfermeiro.selected=false;
+										CBign.selected=false;
+										CBmedico.selected=false;
+										CBparente.selected=false;
+										CBproprio.selected=false;
+										CBoutro.selected=false;
+										CBoutroSaude.selected=false;
+										TIoutroSaude.editable=false;
+										TIoutro.editable=false;
+										
+										TIoutroSaude.text="";
+										TIoutro.text="";
+				
+									}
+								}
+							
+							}
+						}
+					}
+				}
+			}
+		
+		
+		}	
+		
+
+		protected function categoriaEscolhido():String{
+			if(CBenfermeiro.selected){
+				return CBenfermeiro.label;
+			}else{	
+				if(CBign.selected){
+					return CBign.label;
+				}else{
+					if(CBmedico.selected){
+						return CBmedico.label;
+					}else{
+						if(CBoutro.selected){
+							return CBoutro.label;
+						}else{
+							if(CBoutroSaude.selected){
+								return CBoutroSaude.label;
+							}else{
+								if(CBparente.selected){
+									return CBparente.label;
+								}else{
+									if(CBproprio.selected){
+										return CBproprio.label;
+									}else{
+										return null;
+									}
+								}
+							}
+						}
+					}
+				}
+			}	
+		}
+		
+		protected function CBestadoEscolha(evt:DropdownEvent):void{
+				estadoEscolhido = ComboBox(evt.target).selectedItem.label;
+				
+		}
+		
+		protected function UpdateBancoS(evt:ResultEvent):void{
+			if(evt.result.toString()=="false"){
+				Alert.show("Erro! Dados não cadastrados!");
+				
+			}else{
+				proximoTela();
+			}
+			
+		}
+				
+		protected function BTvoltar():void{
+			removeAllChildren();
+			var tela:Paciente = new Paciente();
+			tela.IDpacientBanco=IDpaciente;
+			tela.cadOUBusc=cadOUBusc;
+			tela.UsuarioLogin=UsuarioLogin;
+			tela.Volta=true;
+			addChild(tela as DisplayObject);
+		}
+		protected function BTproximo():void{
+			///*
+				if(CampoEmBranco()==""){// retorna "" se não existir campos obrigatorios em branco
+					if(Volta){
+						cadsoli.UpdateBancoS(IDpaciente,TInomeSolicitante.text,TIdddS.text, TItelefoneS.text,TIRamalS.text,TIinstituicao.text,estadoEscolhido,
+						TImunicipioS.text,TIbairroS.text,TIenderecoS.text,
+						TInumeroS.text,categoriaEscolhido(),TIoutro.text,TIoutroSaude.text);
+					}else{
+						cadsoli.InsertBancoS(IDpaciente,TInomeSolicitante.text,TIdddS.text, TItelefoneS.text,TIRamalS.text,TIinstituicao.text,estadoEscolhido,
+						TImunicipioS.text,TIbairroS.text,TIenderecoS.text,
+						TInumeroS.text,categoriaEscolhido(),TIoutro.text,TIoutroSaude.text);
+ 					}
+					
+				}else{
+					Alert.show(CampoEmBranco());
+				}
+				//*/
+				//Alert.show(categoriaEscolhido());
+				
+				
+		}           
+            
+				
+				]]>
+	</mx:Script>	
+	
+	
+	
+	
+<mx:Panel horizontalScrollPolicy="auto" verticalScrollPolicy="auto" id="PNmain" horizontalCenter="0" verticalCenter="0" width="96%" height="90%" layout="absolute">	
+	
+	<mx:Panel width="1300" height="690" layout="absolute" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNsolicitante" title="Solicitante" left="0" top="0" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+		<mx:Label text="Nome do solicitante*:" id="LBnomeSolicitante" fontFamily="Times New Roman" fontSize="16" width="149" height="25" left="10" top="10"/>
+		<mx:TextInput width="953" id="TInomeSolicitante" fontFamily="Times New Roman" fontSize="16" top="10" left="167" height="29"/>
+		<mx:Label text="Instituição*:" id="LBInstituicaoS" fontFamily="Times New Roman" fontSize="16" height="27" top="110" left="10" width="81"/>
+		<mx:TextInput id="TIinstituicao" fontFamily="Times New Roman" fontSize="16" height="29" top="110" left="100" width="893"/>
+		<mx:Label text="Telefone:" id="LBTelefoneS" fontFamily="Times New Roman" fontSize="16" width="72" height="25" left="10" top="60"/>
+		<mx:TextInput width="300" id="TItelefoneS" fontFamily="Times New Roman" fontSize="16" left="167" top="60" height="29" maxChars="9"/>
+		<mx:TextInput width="250" id="TIoutroSaude" fontFamily="Times New Roman" fontSize="16" left="330" verticalCenter="70" editable="false"/>
+		<mx:TextInput width="400" id="TIoutro" fontFamily="Times New Roman" fontSize="16" left="175" verticalCenter="110" editable="false"/>
+		<mx:CheckBox label="Outro" id="CBoutro" fontFamily="Times New Roman" fontSize="16" width="85" height="28.965515" left="90" verticalCenter="110" click="categoria(5)"/>
+		<mx:TextInput width="50" id="TIdddS" fontFamily="Times New Roman" fontSize="16" left="90" top="60" maxChars="2"/>
+		<mx:Label text="Ramal:" id="LBRamals" fontFamily="Times New Roman" fontSize="16" top="60" width="67" height="25" horizontalCenter="50"/>
+		<mx:TextInput id="TIRamalS" fontFamily="Times New Roman" fontSize="16" height="29" top="60" width="132" horizontalCenter="150"/>
+		<mx:Label text="Categoria*:" id="LBcategoria" fontFamily="Times New Roman" fontSize="16" left="10" width="87" height="25" verticalCenter="30"/>
+		<mx:CheckBox label="Próprio" id="CBproprio" fontFamily="Times New Roman" fontSize="16" width="83" height="29" left="90" verticalCenter="30" click="categoria(4)"/>
+		<mx:CheckBox label="Outro profissional da saúde" id="CBoutroSaude" fontFamily="Times New Roman" fontSize="16" width="200" height="28.965515" left="90" verticalCenter="70" click="categoria(6)"/>
+		<mx:CheckBox id="CBmedico" fontFamily="Times New Roman" fontSize="16" label="Médico(a)" width="96" left="180" verticalCenter="30" click="categoria(2)"/>
+		<mx:CheckBox label="Parente" id="CBparente" fontFamily="Times New Roman" fontSize="16" left="290" verticalCenter="30" click="categoria(3)"/>
+		<mx:CheckBox label="Enfermeiro(a)" id="CBenfermeiro" fontFamily="Times New Roman" fontSize="16" width="118" height="29" left="380" verticalCenter="30" click="categoria(0)"/>
+		<mx:CheckBox label="Ignorado" id="CBign" fontFamily="Times New Roman" fontSize="16" width="84" height="29" left="500" verticalCenter="30" click="categoria(1)"/>
+		<mx:Label text="Endereço:" id="LBEnderecoS" fontFamily="Times New Roman" fontSize="16" width="82" left="10" top="160"/>
+		<mx:TextInput id="TIenderecoS" fontFamily="Times New Roman" fontSize="16" left="100" width="893" top="160" height="29"/>
+		<mx:Label text="Bairro:" id="LBBairroS" fontFamily="Times New Roman" fontSize="16" width="79" top="210" horizontalCenter="-50"/>
+		<mx:Label text="Estado*:" id="LBestadoS" fontFamily="Times New Roman" fontSize="16" height="25" right="250" width="60" top="210"/>
+		<mx:TextInput id="TIbairroS" fontFamily="Times New Roman" fontSize="16" width="300" top="210" height="29" horizontalCenter="150"/>
+		<mx:TextInput id="TImunicipioS" fontFamily="Times New Roman" fontSize="16" left="97" width="393" top="210" height="29"/>
+		<mx:Label text="Município:" id="LBmunicipioS" fontFamily="Times New Roman" fontSize="16" width="79" left="10" top="210"/>
+		<mx:Label text="Número:" id="LBnumeroS" fontFamily="Times New Roman" fontSize="16" width="85" height="25" right="150" top="160"/>
+		<mx:TextInput width="132" id="TInumeroS" fontFamily="Times New Roman" fontSize="16" right="10" height="29" top="160"/>
+		<mx:ComboBox id="CBOXEstadoS" fontFamily="Times New Roman" fontSize="16" right="10" width="207" top="210" dataProvider="{estado}" close="CBestadoEscolha(event)"></mx:ComboBox>
+		<ns1:ButtonEnter label="Próximo" fontWeight="bold" id="BTnext" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" verticalCenter="220" fontFamily="Times New Roman" fontSize="16" width="121" height="29" click="BTproximo()" right="10"/>
+		<ns1:ButtonEnter label="Voltar" fontWeight="bold" id="BTant" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" verticalCenter="220" fontFamily="Times New Roman" fontSize="16" width="121" height="29" click="BTvoltar()" left="10"/>
+		<mx:Label text="¹Campos com * são de preenchimento obrigatorio." fontFamily="Times New Roman" fontSize="16" id="LBobservacao" left="10" width="346" bottom="55"/>
+
+	</mx:Panel>
+</mx:Panel>
+</mx:Canvas>

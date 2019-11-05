@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNbuscaformulario" xmlns:ns1="*" initialize="inicio()">
+	
+<mx:RemoteObject id="cadform" destination="amfphp" source="php.CadastroFormulario" fault="FalhaObRemot(event)">
+		<mx:method name="InsertBancoBase" result="InsertBancoBase(event)" fault="FalhaMet(event)" />
+		<mx:method name="InsertBancoSinonimo" result="InsertBancoSinonimo(event)" fault="FalhaMet(event)" />		
+		</mx:RemoteObject>	
+
+
+	
+	
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.StringUtil;
+			
+			
+			
+		protected function FalhaMet(e:FaultEvent):void{// função para falha de metodo
+		
+				Alert.show(e.message.toString());
+		}
+		protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+		}
+			
+		private function  inicio():void{
+				limpaForm();
+				
+		}
+		
+		protected function limpaForm():void{
+			RTEformulario.text="";
+			TAsinonimo.text="";
+			TItitulo.text="";
+		}
+		
+		protected function InsertBancoSinonimo(ev:ResultEvent):void{
+			if(ev.result.toString()=="false"){
+				Alert.show("Erro ao cadastrar!");
+			}else{
+				Alert.show("Cadastrado com sucesso!");
+			}
+		}
+		
+		protected function InsertBancoBase(evt:ResultEvent):void{
+			
+		 		var s:String = TAsinonimo.text;
+				var ary:Array= s.split(",");
+				var id:String = evt.result.toString();
+				if(id=="false"){
+					Alert.show("ERRO, verifique se titulo já não foi cadastrado no sistema!");		 				 	
+			 		
+		 		}else{
+		 			cadform.InsertBancoSinonimo(id,ary);
+		 		}
+		 	
+		}
+			
+		protected function BTcadforml():void{
+			if(StringUtil.trim(TItitulo.text)==""|| StringUtil.trim(RTEformulario.text)==""){
+				Alert.show("Titulo ou orientação em branco!");
+			}else{
+				if(StringUtil.trim(TAsinonimo.text)==""){
+					Alert.show("Insira pelo menos um sinonimo!");
+				
+		 		}else{	
+					cadform.InsertBancoBase(TItitulo.text,RTEformulario.htmlText);
+		 		}
+			}
+			
+		}
+            
+				
+				]]>
+	</mx:Script>	
+	
+	
+	
+	
+	
+	<mx:Panel width="96%" height="90%" layout="absolute" horizontalCenter="0" verticalCenter="0" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNform" title="Formulario" fontFamily="Times New Roman" fontSize="16">
+		<mx:RichTextEditor title="Orientações tóxicologica" width="70%" height="90%" left="10" top="10" id="RTEformulario" fontFamily="Times New Roman" fontSize="16">
+		</mx:RichTextEditor>
+		<mx:Label text="Sinônimos¹" id="LBsinonimo" top="115" fontFamily="Times New Roman" fontSize="16" fontWeight="bold" textAlign="center" right="10" width="26%"/>
+		<mx:Label text="Título" id="LBtitulo" top="10" fontFamily="Times New Roman" fontSize="16" fontWeight="bold" textAlign="center" right="10" width="26%"/>
+		<ns1:ButtonEnter label="Salvar" fontWeight="bold" click="BTcadforml()" id="BTcadform" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" right="73" bottom="20" fontSize="16"/>
+		<mx:TextArea width="26%" height="50%" right="10" verticalCenter="45" id="TAsinonimo" fontSize="16"/>
+		<mx:TextInput width="26%" height="24" right="10" top="43" id="TItitulo" fontSize="16"/>
+		<mx:Label text="¹Separe os sinônimos usando vírgula." fontFamily="Times New Roman" fontSize="16" id="LBobservacao" left="10" width="346" bottom="5"/>
+
+	</mx:Panel>
+	
+</mx:Canvas>

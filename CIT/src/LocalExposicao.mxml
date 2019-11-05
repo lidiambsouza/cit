@@ -1,0 +1,720 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNle" xmlns:ns1="*" initialize="inicio()" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	
+	<mx:RemoteObject id="cadle" destination="amfphp" source="php.CadastroLocalExposicao" fault="FalhaObRemot(event)">
+		<mx:method name="InsertBancoLE" result="InsertBancoLE(event)" fault="FalhaMet(event)" />
+		<mx:method name="UpdateBancoLE" result="UpdateBancoLE(event)" fault="FalhaMet(event)" />	
+			
+		</mx:RemoteObject>
+		
+	<mx:RemoteObject id="consultpaci" destination="amfphp" source="php.ConsultarPaciente" fault="FalhaObRemot(event)">
+		<mx:method name="SelectBancoLE" result="SelectBancoLE(event)" fault="FalhaMet(event)" />
+		<mx:method name="SelectExist" result="SelectExist(event)" fault="FalhaMet(event)" />			
+		</mx:RemoteObject>
+		
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.events.DropdownEvent;
+			import mx.utils.StringUtil;
+			
+			[Bindable]
+			public var cadOUBusc:Boolean;
+			[Bindable]
+			public var ObservacaoS:String;
+			
+			[Bindable]
+			public var UsuarioLogin:String;
+			
+			[Bindable]
+			public var IDpaciente:int;
+			[Bindable]
+			public var Volta:Boolean;
+			
+			protected var estadoEscolhido:String;
+			
+			[Bindable]
+			public var estado:ArrayCollection = new ArrayCollection(
+                [ {label:"Selecione o Estado...", data:0},{label:"Acre", data:1},
+                	{label:"Alagoas", data:2},{label:"Amapá", data:3},
+                	{label:"Amazonas", data:4},{label:"Bahia", data:5},
+                	{label:"Ceará", data:6},{label:"Distrito Federal", data:7},
+                	{label:"Espírito Santo", data:8},{label:"Goiás", data:9},
+                	{label:"Maranhão", data:10},{label:"Mato Grosso", data:11},
+                	{label:"Mato Grosso do Sul", data:12},{label:"Minas Gerais", data:13},
+                	{label:"Pará", data:14},{label:"Paraíba", data:15},
+                	{label:"Paraná", data:16},{label:"Pernambuco", data:17},
+                	{label:"Piauí", data:18},{label:"Rio de Janeiro", data:19},
+                	{label:"Rio Grande do Norte", data:20},{label:"Rio Grande do Sul", data:21},
+                	{label:"Rondônia", data:22},{label:"Roraima", data:23},
+                	{label:"Santa Catarina", data:24},{label:"São Paulo", data:25},
+                  {label:"Sergipe", data:26},{label:"Tocantins", data:27} ]);
+			
+			
+		protected function FalhaMet(e:FaultEvent):void{// função para falha de metodo
+		
+				Alert.show(e.message.toString());
+		}
+		protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+		}			
+			
+		private function  inicio():void{
+				limpaForm();
+				consultpaci.SelectExist(IDpaciente,"local_exposicao");
+				
+		}
+		protected function SelectExist(evt:ResultEvent):void{
+			if(evt.result.toString()=="true"){
+				consultpaci.SelectBancoLE(IDpaciente);
+				Volta=true;
+			}else{
+				Volta=false;
+			}
+		}
+		
+		protected function UpdateBancoLE(evt:ResultEvent):void{
+			if(evt.result.toString()=="false"){
+				Alert.show("Erro! Dados não cadastrados!");
+				
+			}else{
+				proximoTela();
+			}
+			
+		}
+		
+		protected function limpaForm():void{
+			//TIbuscanomeS.text="";
+		}
+		protected function SelectBancoLE(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				var arLE:Array= s.split(",");
+				//LBestabelecimentoR.text=arLE[2];
+				switch(arLE[2]){
+					case"Hospital/Clínicas":
+						estabelecimento(0);
+					break;
+					case"CS/UBS":
+						estabelecimento(1);
+					break;
+					case"Consultorio/Ambulatorio":
+						estabelecimento(2);
+					break;
+					case"Local de trabalho":
+						estabelecimento(3);
+					break;
+					case"Residência":
+						estabelecimento(4);
+					break;
+					case"Ignorado":
+						estabelecimento(5);
+					break;
+					case"Outros CITs":
+						estabelecimento(6);
+					break;
+					case"Outros":
+						estabelecimento(7);
+					break;
+					case"Outros serviços públicos":
+						estabelecimento(8);
+					break;
+				}
+				
+				TIoutroSP.text=arLE[4];				
+				TIoutro.text=arLE[3];			
+				//LBLocalexposicaoR.text=arLE[6];
+				switch(arLE[6]){
+					case"Residência":
+						localDaExpo(0);
+					break;
+					case"Ambiente de trabalho":
+						localDaExpo(1);
+					break;
+					case"Trajeto de trabalho":
+						localDaExpo(2);
+					break;
+					case"Serviço de saúde":
+						localDaExpo(3);
+					break;
+					case"Escola/Creche":
+						localDaExpo(4);
+					break;
+					case"Ambiente Externo":
+						localDaExpo(5);
+					break;
+					case"Ignorado":
+						localDaExpo(6);
+					break;
+					case"Outros":
+						localDaExpo(7);
+					break;
+				
+				}
+				
+				TIoutroLE.text=arLE[7];
+				//LBzonaR.text=arLE[5];
+				switch(arLE[5]){
+					case"Urbana":
+						zona(0);
+					break;
+					case"Rural":
+						zona(1);
+					break;
+					case"Ignorada":
+						zona(2);
+					break;				
+				}
+				
+				TIendereco.text=arLE[11];
+				TInumero.text=arLE[12];
+				//CBOXEstado.selectedIndex=findIndex(estado,"label",arP[12]);
+				//estadoEscolhido=CBOXEstado.selectedItem.label;
+				//LBestadoRLE.text=arLE[8];
+				CBEstado.selectedIndex=findIndex(estado,"label",arLE[8]);
+				estadoEscolhido=CBEstado.selectedItem.label;
+				
+				TImunicipio.text=arLE[9];
+				TIbairro.text=arLE[10];
+				
+			}	
+		private function findIndex(dp:ArrayCollection, prop:String, what:String ):int {
+			for(var k:int=0; k<dp.length; k++) {
+				if(String(dp.getItemAt(k)[prop])==what) return k;
+			}
+			return -1;
+		}
+		protected function InsertBancoLE(evt:ResultEvent):void{
+			if(evt.result.toString()=="false"){
+				Alert.show("Erro! Dados não cadastrados!");
+				
+			}else{
+				//IDpacientBanco=parseInt(evt.result.toString());
+				//Alert.show(IDpacientBanco.toString());
+				proximoTela();
+			}
+			
+		}	
+        
+        protected function proximoTela():void{
+			removeAllChildren();
+			var tela:Exposicao = new Exposicao();
+			tela.IDpaciente=IDpaciente;
+			tela.cadOUBusc=cadOUBusc;
+			tela.UsuarioLogin=UsuarioLogin;
+			//tela.Observacao=ObservacaoS;
+			addChild(tela as DisplayObject);
+		}
+		
+		protected function estabelecimento(flag:int):void{
+			if(flag==0){
+				CBhospClinica.selected=true;
+				CBcsubs.selected=false;
+				CBconsultAmb.selected=false;
+				CBlocaltrabalho.selected=false;
+				CBresidencia.selected=false;
+				CBignoradoES.selected=false;
+				CBoutroscits.selected=false;
+				CBoutros.selected=false;
+				CBoutrosservPublic.selected=false;
+				
+				TIoutro.editable=false;
+				TIoutroSP.editable=false;
+				TIoutro.text="";
+				TIoutroSP.text="";
+			}else{
+				if(flag==1){
+					CBhospClinica.selected=false;
+					CBcsubs.selected=true;
+					CBconsultAmb.selected=false;
+					CBlocaltrabalho.selected=false;
+					CBresidencia.selected=false;
+					CBignoradoES.selected=false;
+					CBoutroscits.selected=false;
+					CBoutros.selected=false;
+					CBoutrosservPublic.selected=false;
+				
+					TIoutro.editable=false;
+					TIoutroSP.editable=false;
+					TIoutro.text="";
+					TIoutroSP.text="";
+				}else{
+					if(flag==2){
+						CBhospClinica.selected=false;
+						CBcsubs.selected=false;
+						CBconsultAmb.selected=true;
+						CBlocaltrabalho.selected=false;
+						CBresidencia.selected=false;
+						CBignoradoES.selected=false;
+						CBoutroscits.selected=false;
+						CBoutros.selected=false;
+						CBoutrosservPublic.selected=false;
+				
+						TIoutro.editable=false;
+						TIoutroSP.editable=false;
+						TIoutro.text="";
+						TIoutroSP.text="";
+					}else{
+						if(flag==3){
+							CBhospClinica.selected=false;
+							CBcsubs.selected=false;
+							CBconsultAmb.selected=false;
+							CBlocaltrabalho.selected=true;
+							CBresidencia.selected=false;
+							CBignoradoES.selected=false;
+							CBoutroscits.selected=false;
+							CBoutros.selected=false;
+							CBoutrosservPublic.selected=false;
+				
+							TIoutro.editable=false;
+							TIoutroSP.editable=false;
+							TIoutro.text="";
+							TIoutroSP.text="";
+						}else{
+							if(flag==4){
+								CBhospClinica.selected=false;
+								CBcsubs.selected=false;
+								CBconsultAmb.selected=false;
+								CBlocaltrabalho.selected=false;
+								CBresidencia.selected=true;
+								CBignoradoES.selected=false;
+								CBoutroscits.selected=false;
+								CBoutros.selected=false;
+								CBoutrosservPublic.selected=false;
+				
+								TIoutro.editable=false;
+								TIoutroSP.editable=false;
+								TIoutro.text="";
+								TIoutroSP.text="";
+							}else{
+								if(flag==5){
+									CBhospClinica.selected=false;
+									CBcsubs.selected=false;
+									CBconsultAmb.selected=false;
+									CBlocaltrabalho.selected=false;
+									CBresidencia.selected=false;
+									CBignoradoES.selected=true;
+									CBoutroscits.selected=false;
+									CBoutros.selected=false;
+									CBoutrosservPublic.selected=false;
+				
+									TIoutro.editable=false;
+									TIoutroSP.editable=false;
+									TIoutro.text="";
+									TIoutroSP.text="";
+								}else{
+									if(flag==6){
+										CBhospClinica.selected=false;
+										CBcsubs.selected=false;
+										CBconsultAmb.selected=false;
+										CBlocaltrabalho.selected=false;
+										CBresidencia.selected=false;
+										CBignoradoES.selected=false;
+										CBoutroscits.selected=true;
+										CBoutros.selected=false;
+										CBoutrosservPublic.selected=false;
+				
+										TIoutro.editable=false;
+										TIoutroSP.editable=false;
+										TIoutro.text="";
+										TIoutroSP.text="";								
+									}else{
+										if(flag==7){
+											CBhospClinica.selected=false;
+											CBcsubs.selected=false;
+											CBconsultAmb.selected=false;
+											CBlocaltrabalho.selected=false;
+											CBresidencia.selected=false;
+											CBignoradoES.selected=false;
+											CBoutroscits.selected=false;
+											CBoutros.selected=true;
+											CBoutrosservPublic.selected=false;
+				
+											TIoutro.editable=true;
+											TIoutroSP.editable=false;
+											//TIoutro.text="";
+											TIoutroSP.text="";	
+										}else{
+											if(flag==8){
+												CBhospClinica.selected=false;
+												CBcsubs.selected=false;
+												CBconsultAmb.selected=false;
+												CBlocaltrabalho.selected=false;
+												CBresidencia.selected=false;
+												CBignoradoES.selected=false;
+												CBoutroscits.selected=false;
+												CBoutros.selected=false;
+												CBoutrosservPublic.selected=true;
+				
+												TIoutro.editable=false;
+												TIoutroSP.editable=true;
+												TIoutro.text="";
+												//TIoutroSP.text="";
+											}else{
+												CBhospClinica.selected=false;
+												CBcsubs.selected=false;
+												CBconsultAmb.selected=false;
+												CBlocaltrabalho.selected=false;
+												CBresidencia.selected=false;
+												CBignoradoES.selected=false;
+												CBoutroscits.selected=false;
+												CBoutros.selected=false;
+												CBoutrosservPublic.selected=false;
+				
+												TIoutro.editable=false;
+												TIoutroSP.editable=false;
+												TIoutro.text="";
+												TIoutroSP.text="";
+											}
+										}
+									}
+								}
+							
+							}
+						}
+					}
+				}
+			}
+		
+		
+		}
+		
+		protected function zona(flag:int):void{
+			if(flag==0){
+				CBurbana.selected=true;
+				CBrural.selected=false;
+				CBignorada.selected=false;
+								
+			}else{
+				if(flag==1){
+					CBurbana.selected=false;
+					CBrural.selected=true;
+					CBignorada.selected=false;
+					
+				}else{
+					if(flag==2){
+						CBurbana.selected=false;
+						CBrural.selected=false;
+						CBignorada.selected=true;
+						
+					}else{
+						CBurbana.selected=false;
+						CBrural.selected=false;
+						CBignorada.selected=false;
+													
+					}
+				}
+			}
+		
+		
+		}
+		
+		protected function localDaExpo(flag:int):void{
+			if(flag==0){
+				CBresidenLE.selected=true;
+				CBambtrabalho.selected=false;
+				CBtrajetotrabalho.selected=false;
+				CBservsaude.selected=false;
+				CBescolacreche.selected=false;
+				CBambientexter.selected=false;
+				CBignoradoLE.selected=false;
+				CBoutrosLE.selected=false;
+								
+				TIoutroLE.editable=false;
+				TIoutroLE.text="";
+			}else{
+				if(flag==1){
+					CBresidenLE.selected=false;
+					CBambtrabalho.selected=true;
+					CBtrajetotrabalho.selected=false;
+					CBservsaude.selected=false;
+					CBescolacreche.selected=false;
+					CBambientexter.selected=false;
+					CBignoradoLE.selected=false;
+					CBoutrosLE.selected=false;
+								
+					TIoutroLE.editable=false;
+					TIoutroLE.text="";
+				}else{
+					if(flag==2){
+						CBresidenLE.selected=false;
+						CBambtrabalho.selected=false;
+						CBtrajetotrabalho.selected=true;
+						CBservsaude.selected=false;
+						CBescolacreche.selected=false;
+						CBambientexter.selected=false;
+						CBignoradoLE.selected=false;
+						CBoutrosLE.selected=false;
+								
+						TIoutroLE.editable=false;
+						TIoutroLE.text="";
+					}else{
+						if(flag==3){
+							CBresidenLE.selected=false;
+							CBambtrabalho.selected=false;
+							CBtrajetotrabalho.selected=false;
+							CBservsaude.selected=true;
+							CBescolacreche.selected=false;
+							CBambientexter.selected=false;
+							CBignoradoLE.selected=false;
+							CBoutrosLE.selected=false;
+								
+							TIoutroLE.editable=false;
+							TIoutroLE.text="";
+						}else{
+							if(flag==4){
+								CBresidenLE.selected=false;
+								CBambtrabalho.selected=false;
+								CBtrajetotrabalho.selected=false;
+								CBservsaude.selected=false;
+								CBescolacreche.selected=true;
+								CBambientexter.selected=false;
+								CBignoradoLE.selected=false;
+								CBoutrosLE.selected=false;
+								
+								TIoutroLE.editable=false;
+								TIoutroLE.text="";
+							}else{
+								if(flag==5){
+									CBresidenLE.selected=false;
+									CBambtrabalho.selected=false;
+									CBtrajetotrabalho.selected=false;
+									CBservsaude.selected=false;
+									CBescolacreche.selected=false;
+									CBambientexter.selected=true;
+									CBignoradoLE.selected=false;
+									CBoutrosLE.selected=false;
+								
+									TIoutroLE.editable=false;
+									TIoutroLE.text="";
+								}else{
+									if(flag==6){
+										CBresidenLE.selected=false;
+										CBambtrabalho.selected=false;
+										CBtrajetotrabalho.selected=false;
+										CBservsaude.selected=false;
+										CBescolacreche.selected=false;
+										CBambientexter.selected=false;
+										CBignoradoLE.selected=true;
+										CBoutrosLE.selected=false;
+								
+										TIoutroLE.editable=false;
+										TIoutroLE.text="";							
+									}else{
+										if(flag==7){
+											CBresidenLE.selected=false;
+											CBambtrabalho.selected=false;
+											CBtrajetotrabalho.selected=false;
+											CBservsaude.selected=false;
+											CBescolacreche.selected=false;
+											CBambientexter.selected=false;
+											CBignoradoLE.selected=false;
+											CBoutrosLE.selected=true;
+								
+											TIoutroLE.editable=true;	
+										}else{
+											CBresidenLE.selected=false;
+											CBambtrabalho.selected=false;
+											CBtrajetotrabalho.selected=false;
+											CBservsaude.selected=false;
+											CBescolacreche.selected=false;
+											CBambientexter.selected=false;
+											CBignoradoLE.selected=false;
+											CBoutrosLE.selected=false;
+								
+											TIoutroLE.editable=false;
+											TIoutroLE.text="";
+											
+										}
+									}
+								}
+							
+							}
+						}
+					}
+				}
+			}
+		
+		
+		}  
+        
+        protected function CBestadoEscolha(evt:DropdownEvent):void{
+				estadoEscolhido = ComboBox(evt.target).selectedItem.label;
+				
+		}
+		
+		protected function estabelecimentoEscolhido():String{
+			if(CBhospClinica.selected){
+				return CBhospClinica.label;
+			}else{	
+				if(CBcsubs.selected){
+					return CBcsubs.label;
+				}else{
+					if(CBconsultAmb.selected){
+						return CBconsultAmb.label;
+					}else{
+						if(CBlocaltrabalho.selected){
+							return CBlocaltrabalho.label;
+						}else{
+							if(CBoutroscits.selected){
+								return CBoutroscits.label;
+							}else{
+								if(CBresidencia.selected){
+									return CBresidencia.label;
+								}else{
+									if(CBignoradoES.selected){
+										return CBignoradoES.label;
+									}else{
+										if(CBoutros.selected){
+											return CBoutros.label;
+										}else{
+											if(CBoutrosservPublic.selected){
+												return CBoutrosservPublic.label;
+											}else{
+												return null;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}	
+		}    
+		
+		protected function zonaEscolhido():String{
+			if(CBurbana.selected){
+				return CBurbana.label;
+			}else{	
+				if(CBrural.selected){
+					return CBrural.label;
+				}else{
+					if(CBignorada.selected){
+						return CBignorada.label;
+					}else{
+						return null;						
+					}
+				}
+			}
+		}
+		
+		protected function localEscolhido():String{
+			if(CBresidenLE.selected){
+				return CBresidenLE.label;
+			}else{	
+				if(CBambtrabalho.selected){
+					return CBambtrabalho.label;
+				}else{
+					if(CBtrajetotrabalho.selected){
+						return CBtrajetotrabalho.label;
+					}else{
+						if(CBservsaude.selected){
+							return CBservsaude.label;
+						}else{
+							if(CBescolacreche.selected){
+								return CBescolacreche.label;
+							}else{
+								if(CBambientexter.selected){
+									return CBambientexter.label;
+								}else{
+									if(CBignoradoLE.selected){
+										return CBignoradoLE.label;
+									}else{
+										if(CBoutrosLE.selected){
+											return CBoutrosLE.label;
+										}else{
+											return null;
+											
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}	
+		}
+		
+		protected function BTproximo():void{
+			if(Volta){
+					cadle.UpdateBancoLE(IDpaciente,estabelecimentoEscolhido(),TIoutro.text,TIoutroSP.text,
+					zonaEscolhido(),localEscolhido(),TIoutroLE.text,estadoEscolhido,
+					TImunicipio.text,TIbairro.text,TIendereco.text,TInumero.text);
+			}else{				
+					cadle.InsertBancoLE(IDpaciente,estabelecimentoEscolhido(),TIoutro.text,TIoutroSP.text,
+					zonaEscolhido(),localEscolhido(),TIoutroLE.text,estadoEscolhido,
+					TImunicipio.text,TIbairro.text,TIendereco.text,TInumero.text);
+ 			}	
+					
+			
+				
+		}
+		
+		protected function BTvoltar():void{
+			removeAllChildren();
+			var tela:Observacao =new Observacao();			
+			tela.IDpaciente=IDpaciente;
+			tela.cadOUBusc=cadOUBusc;
+			tela.UsuarioLogin=UsuarioLogin;
+			//tela.ObservacaoI=ObservacaoS;
+			tela.Volta=true;
+			addChild(tela as DisplayObject);
+		}           
+		
+				
+				]]>
+	</mx:Script>	
+	
+	
+	
+<mx:Panel horizontalScrollPolicy="auto" verticalScrollPolicy="auto" id="PNmain" horizontalCenter="0" verticalCenter="0" width="96%" height="90%" layout="absolute">
+
+	<mx:Panel width="1300" height="690" layout="absolute" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNlocalexposicao" title="Local da exposição" fontFamily="Times New Roman" fontSize="16" left="0" top="0" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+		<mx:Label text="Estabelecimento:" id="LBestabelecimento" fontFamily="Times New Roman" fontSize="16" width="121" height="25" top="10" left="10"/>
+		<mx:Label text="Local da exposição:" id="LBLocalexposicao" fontFamily="Times New Roman" fontSize="16" width="146" height="25" top="284" left="10"/>
+		<mx:CheckBox label="Trajeto de trabalho" id="CBtrajetotrabalho" fontFamily="Times New Roman" fontSize="16" width="156" top="317" left="827" click="localDaExpo(2)"/>
+		<mx:CheckBox label="Ignorado" id="CBignoradoLE" fontFamily="Times New Roman" fontSize="16" width="94" top="317" left="1002" click="localDaExpo(6)"/>
+		<mx:CheckBox id="CBambtrabalho" fontFamily="Times New Roman" fontSize="16" label="Ambiente de trabalho" width="160" top="317" left="303" click="localDaExpo(1)"/>
+		<mx:CheckBox label="Residência" id="CBresidenLE" fontFamily="Times New Roman" fontSize="16" width="109" top="317" left="10" click="localDaExpo(0)"/>
+		<mx:CheckBox label="Consultorio/Ambulatorio" id="CBconsultAmb" fontFamily="Times New Roman" fontSize="16" width="180" top="115" left="10" click="estabelecimento(2)"/>
+		<mx:Label text="Zona:" id="LBzona" fontFamily="Times New Roman" fontSize="16" width="55" height="25" top="10" left="883"/>
+		<mx:CheckBox label="Ignorada" id="CBignorada" fontFamily="Times New Roman" fontSize="16" width="100" top="115" left="883" click="zona(2)"/>
+		<mx:CheckBox id="CBrural" fontFamily="Times New Roman" fontSize="16" label="Rural" width="100" top="78" left="883" click="zona(1)"/>
+		<mx:CheckBox label="Urbana" id="CBurbana" fontFamily="Times New Roman" fontSize="16" width="100" top="43" left="883" click="zona(0)"/>
+		<mx:CheckBox label="Residência" id="CBresidencia" fontFamily="Times New Roman" fontSize="16" width="146" top="115" left="209" click="estabelecimento(4)"/>
+		<mx:CheckBox label="Outros" id="CBoutros" fontFamily="Times New Roman" fontSize="16" width="100" top="152" left="209" click="estabelecimento(7)"/>
+		<mx:CheckBox label="Ignorado" id="CBignoradoES" fontFamily="Times New Roman" fontSize="16" width="180" top="152" left="10" click="estabelecimento(5)"/>
+		<mx:CheckBox id="CBoutroscits" fontFamily="Times New Roman" fontSize="16" label="Outros CITs" width="118" top="78" left="209" click="estabelecimento(6)"/>
+		<mx:CheckBox label="Local de trabalho" id="CBlocaltrabalho" fontFamily="Times New Roman" fontSize="16" width="146" top="43" left="209" click="estabelecimento(3)"/>
+		<mx:CheckBox id="CBcsubs" fontFamily="Times New Roman" fontSize="16" label="CS/UBS" width="100" top="78" left="10" click="estabelecimento(1)"/>
+		<mx:CheckBox label="Hospital/Clínicas" id="CBhospClinica" fontFamily="Times New Roman" fontSize="16" width="146" top="43" left="10" click="estabelecimento(0)"/>
+		<mx:TextInput width="370" id="TIoutro" fontFamily="Times New Roman" fontSize="16" top="152" left="317" height="29" editable="false"/>
+		<mx:TextInput width="560.5" id="TIoutroLE" fontFamily="Times New Roman" fontSize="16" top="354" left="116" height="29" editable="false"/>
+		<mx:CheckBox label="Outros serviços públicos" id="CBoutrosservPublic" fontFamily="Times New Roman" fontSize="16" width="180" top="189" left="10" click="estabelecimento(8)"/>
+		<mx:TextInput width="478" id="TIoutroSP" fontFamily="Times New Roman" fontSize="16" top="189" left="209" height="29" editable="false"/>
+		<mx:CheckBox label="Ambiente Externo" id="CBambientexter" fontFamily="Times New Roman" fontSize="16" width="156" top="317" left="663" click="localDaExpo(5)"/>
+		<mx:CheckBox label="Outros" id="CBoutrosLE" fontFamily="Times New Roman" fontSize="16" width="89" top="354" left="10" click="localDaExpo(7)"/>
+		<mx:CheckBox id="CBescolacreche" fontFamily="Times New Roman" fontSize="16" label="Escola/Creche" width="134" top="317" left="503.5" click="localDaExpo(4)"/>
+		<mx:CheckBox label="Serviço de saúde" id="CBservsaude" fontFamily="Times New Roman" fontSize="16" width="143" top="317" left="137" height="29" click="localDaExpo(3)"/>
+		<mx:Label text="Endereço:" id="LBEndereco" fontFamily="Times New Roman" fontSize="16" top="461" left="10" width="76"/>
+		<mx:TextInput id="TIendereco" fontFamily="Times New Roman" fontSize="16" top="461" left="94" width="794" height="29"/>
+		<mx:Label text="Bairro:" id="LBBairro" fontFamily="Times New Roman" fontSize="16" top="412" right="279" width="64" height="25"/>
+		<mx:Label text="UF:" id="LBuf" fontFamily="Times New Roman" fontSize="16" left="10" width="52" top="412"/>
+		<mx:TextInput id="TIbairro" fontFamily="Times New Roman" fontSize="16" top="412" right="10" width="261" height="29"/>
+		<mx:TextInput id="TImunicipio" fontFamily="Times New Roman" fontSize="16" top="412" width="482" horizontalCenter="1" height="29"/>
+		<mx:Label text="Município:" id="LBmunicipio" fontFamily="Times New Roman" fontSize="16" top="412" width="81" horizontalCenter="-288"/>
+		<mx:Label text="Nº.:" id="LBnumero" fontFamily="Times New Roman" fontSize="16" width="57" right="286" height="25" top="461"/>
+		<mx:TextInput width="261" id="TInumero" fontFamily="Times New Roman" fontSize="16" right="10" top="461" height="29"/>
+		<mx:ComboBox id="CBEstado" fontFamily="Times New Roman" fontSize="16" top="412" left="70" width="207" height="29" dataProvider="{estado}" close="CBestadoEscolha(event)"></mx:ComboBox>
+		<ns1:ButtonEnter label="Próximo" fontWeight="bold" id="BTnext" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" verticalCenter="220" fontFamily="Times New Roman" fontSize="16" width="121" height="29" click="BTproximo()" right="10"/>
+		<ns1:ButtonEnter label="Voltar" fontWeight="bold" id="BTant" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" verticalCenter="220" fontFamily="Times New Roman" fontSize="16" width="121" height="29" click="BTvoltar()" left="10"/>
+
+	</mx:Panel>
+</mx:Panel>
+</mx:Canvas>

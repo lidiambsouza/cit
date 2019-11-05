@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNbuscausuario" xmlns:ns1="*" initialize="inicio()">
+	
+	
+<mx:RemoteObject id="bususu" destination="amfphp" source="php.BuscaUsuario" fault="FalhaObRemot(event)">
+		<mx:method name="semAcentuacao" result="semAcentuacao(event)" fault="FalhaMet(event)" />
+		<mx:method name="BuscaBanco" result="BuscaBanco(event)" fault="FalhaMet(event)" />
+		
+		</mx:RemoteObject>
+		
+
+	
+	
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			[Bindable]
+			public var resulBusca:ArrayCollection;
+			
+		protected function FalhaMet(e:FaultEvent):void{// função para falha de metodo
+		
+				Alert.show(e.message.toString());
+		}
+		protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+		}
+			
+		private function  inicio():void{
+				limpaForm();
+		}
+		
+		protected function limpaForm():void{
+			TIbuscanome.text="";
+		}
+			
+		
+		protected function BuscaBanco(ev:ResultEvent):void{
+	        var s:String= ev.result.toString();
+	        if (s=="false"){
+	        	Alert.show("Usuario não encontrado!");
+	        }else{
+				var ar:Array= s.split(",");
+				var myarr:Array = new Array();
+				var i:int= 0;
+				while(i < ar.length){
+					var obj: Object = new Object();
+						obj.col1 = ar[i];
+					 	obj.col2 = ar[i+1];
+						obj.col3 = ar[i+2];
+						obj.col4 = ar[i+3];
+						obj.col5 = ar[i+4];
+						obj.col6 = ar[i+5];
+						myarr.push(obj);
+						i=i+6;
+				}
+				resulBusca= new ArrayCollection(myarr);
+	        }
+		}
+		
+		protected function semAcentuacao(ev:ResultEvent):void{
+			//Alert.show(ev.result.toString());
+			bususu.BuscaBanco(ev.result.toString());
+		
+		}	
+			
+		protected function BTbuscar():void{
+			if (TIbuscanome.text==""){
+				Alert.show("Digite um nome!");
+			}else{
+				bususu.semAcentuacao(TIbuscanome.text);
+			}
+		}
+		protected function selectItem():void{
+			//Alert.show("oi");
+			removeAllChildren();
+			var dados:DadosUsuario = new DadosUsuario();
+			dados.resulBdados = DGusuariobusca.selectedItem.col1+","+DGusuariobusca.selectedItem.col2+","+DGusuariobusca.selectedItem.col3+","+DGusuariobusca.selectedItem.col4+","+DGusuariobusca.selectedItem.col5+","+DGusuariobusca.selectedItem.col6;
+			addChild(dados as DisplayObject);
+		} 
+            
+            
+				
+				]]>
+	</mx:Script>	
+	
+	
+	
+	
+	
+	<mx:Panel width="96%" height="90%" layout="absolute" horizontalCenter="0" verticalCenter="0" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNbuscausuario" title="Procurar usúario" fontFamily="Times New Roman" fontSize="16">
+
+		<mx:Label y="10" text="Nome: " id="LBnome" left="10" width="55" fontSize="16"/>
+		<mx:DataGrid width="96%" height="90%" id="DGusuariobusca" horizontalCenter="-5" bottom="10" dataProvider="{resulBusca}" itemClick="selectItem()" fontFamily="Times New Roman" fontSize="16">
+			<mx:columns>
+				<mx:DataGridColumn headerText="ID" dataField="col1" width="50"/>
+				<mx:DataGridColumn headerText="Nome" dataField="col2"/>
+				<mx:DataGridColumn headerText="Lotação" dataField="col3"/>
+				<mx:DataGridColumn headerText="Ramal" dataField="col4"/>
+				<mx:DataGridColumn headerText="Email" dataField="col5"/>
+				<mx:DataGridColumn headerText="Spark" dataField="col6"/>
+			</mx:columns>
+		</mx:DataGrid>
+		<mx:TextInput y="8" width="80%" id="TIbuscanome" left="73" fontSize="16"/>
+		<ns1:ButtonEnter y="8" label="Procurar" fontWeight="bold" click="BTbuscar();" id="BTbuscaus" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" right="10" fontFamily="Times New Roman" fontSize="16"/>
+	</mx:Panel>
+	
+</mx:Canvas>

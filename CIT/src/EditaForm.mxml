@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNbuscaformulario" xmlns:ns1="*" initialize="inicio()">
+	
+	<mx:RemoteObject id="editform" destination="amfphp" source="php.BuscaFormulario" fault="FalhaObRemot(event)">
+		
+		<mx:method name="BuscaBancoForm" result="BuscaBancoF(event)" fault="FalhaMet(event)" />
+		
+		</mx:RemoteObject>	
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			[Bindable]
+			public var resulBuscaF:ArrayCollection;
+			
+			
+		protected function FalhaMet(e:FaultEvent):void{// função para falha de metodo
+		
+				Alert.show(e.message.toString());
+		}
+		protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+		}
+		protected function BuscaBancoF(evt:ResultEvent):void{// função objeto
+				
+			var s:String= evt.result.toString();
+	        if (s=="false"){
+	        	Alert.show("Sinonimo não encontrado!");
+	        }else{
+				var ar:Array= s.split(",");
+				var myarr:Array = new Array();
+				var i:int= 0;
+				while(i < ar.length){
+					var obj: Object = new Object();
+						obj.col1 = ar[i];
+					 	obj.col2 = ar[i+1];
+						myarr.push(obj);
+						i=i+2;
+				}
+				resulBuscaF= new ArrayCollection(myarr);
+	        }
+				
+		}
+		
+			
+		private function  inicio():void{
+				limpaForm();
+		}
+		
+		protected function limpaForm():void{
+			TIbeditS.text="";
+		}
+			
+		protected function BTbuscforml():void{
+			if (TIbeditS.text==""){
+				Alert.show("Digite um sinonimo!");
+			}else{
+				editform.BuscaBancoForm(TIbeditS.text);
+			}
+		}
+		
+		protected function selectItemF():void{
+			//Alert.show("oi");
+			removeAllChildren();			
+			var dados:FormEDT = new FormEDT();
+			dados.resulBdados = DGformEditBusca.selectedItem.col1+","+DGformEditBusca.selectedItem.col2;
+			addChild(dados as DisplayObject);
+			
+		} 
+	
+            
+            
+				
+				]]>
+	</mx:Script>	
+	
+	
+	
+	
+	
+	<mx:Panel width="96%" height="90%" layout="absolute" horizontalCenter="0" verticalCenter="0" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNeditform" title="Procurar formulario" fontFamily="Times New Roman" fontSize="16">
+
+		<mx:Label y="10" text="Sinonimo: " id="LBsinonimoEB" left="10" width="75"/>
+		<mx:DataGrid width="96%" height="90%" id="DGformEditBusca" horizontalCenter="-5" bottom="10" dataProvider="{resulBuscaF}" itemClick="selectItemF()">
+			<mx:columns>
+				<mx:DataGridColumn headerText="ID" dataField="col1" width="70"/>
+				<mx:DataGridColumn headerText="Nome da base" dataField="col2"/>
+			</mx:columns>
+		</mx:DataGrid>
+		<mx:TextInput y="8" width="80%" id="TIbeditS" left="90"/>
+		<ns1:ButtonEnter y="8" label="Procurar" fontWeight="bold" click="BTbuscforml()" id="BTeditBform" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" right="10"/>
+	</mx:Panel>
+	
+</mx:Canvas>

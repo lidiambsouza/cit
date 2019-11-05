@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNcadastusuario" xmlns:ns1="*" initialize="inicio()">
+	
+	
+<mx:RemoteObject id="cadusu" destination="amfphp" source="php.CadastroUsuario" fault="FalhaObRemot(event)">
+		<mx:method name="validarsenha" result="validarsenha(event)" fault="FalhaMet(event)" />
+		<mx:method name="validarlogin" result="validarlogin(event)" fault="FalhaMet(event)" />
+		<mx:method name="validaEmail" result="validaEmail(event)" fault="FalhaMet(event)" />
+		<mx:method name="InsertBanco" result="InsertBanco(event)" fault="FalhaMet(event)" />	
+			
+		</mx:RemoteObject>
+		
+
+	
+	
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.collections.ArrayCollection;
+            import mx.events.DropdownEvent;
+            import mx.utils.StringUtil;
+            
+            protected var perfilEscolhido:int;
+            protected var loginLivre:Boolean;
+            protected var confSenha:Boolean;
+			protected var email:Boolean;
+			[Bindable]
+			public var perfil:ArrayCollection = new ArrayCollection(
+                [ {label:"Selecione o perfil do usuario...", data:0},
+                  {label:"Administrador", data:1}, 
+                  {label:"Editor", data:2}, 
+                  {label:"Consultor", data:3} ]);
+
+			
+			private function  inicio():void{
+				limpaForm();
+			}
+			
+			protected function FalhaMet(e:FaultEvent):void// função para falha de metodo
+			{
+				Alert.show(e.message.toString());
+			}
+			protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+			}
+			
+			protected function CBperfilEscolha(evt:DropdownEvent):void{
+				perfilEscolhido = ComboBox(evt.target).selectedItem.data;
+				
+			}
+			
+			protected function validarsenha(ev:ResultEvent):void{
+				if(ev.result.toString()=="true"){
+					if(TIemail.text!=""){
+								cadusu.validaEmail(TIemail.text);//verificando email
+					}else{
+						cadusu.InsertBanco(TInome.text,TIlogin.text,TIsenha.text,perfilEscolhido,TIlotacao.text,TIramal.text,TIemail.text,TIspark.text);
+					}
+					
+				}else{
+					Alert.show("A senha e a confimação de senha são diferentes");
+				}
+			}
+			protected function validarlogin(ev:ResultEvent):void{
+				//Alert.show("ev: "+ev.result.toString());
+				if(ev.result.toString()=="true"){
+					Alert.show("Login já esta sendo utilizado no sistema.");
+				}else{
+					cadusu.validarsenha(TIsenha.text,TIconfsenha.text);//retorna true se senhas forem iguais
+				}
+			}
+			
+			protected function validaEmail(ev:ResultEvent):void{
+				if(ev.result.toString()=="true"){
+					cadusu.InsertBanco(TInome.text,TIlogin.text,TIsenha.text,perfilEscolhido,TIlotacao.text,TIramal.text,TIemail.text,TIspark.text);
+				}else{
+					Alert.show("Email invalido!");
+				}
+			}
+			
+			protected function InsertBanco(ev:ResultEvent):void{
+				if(ev.result.toString()=="true"){
+					Alert.show("Usuario cadastrado no sistema!");
+				}else{
+					Alert.show("Erro ao cadastrar usuario no sistema!");
+				}
+			}
+			
+			protected function CampoEmBranco():String{
+				var msg:String="";
+			
+				if(StringUtil.trim(TInome.text)==""){
+					msg="Preencha o campo nome";
+				}else{
+				 if(StringUtil.trim(TIlogin.text)==""){
+				 	msg="Preencha o campo login";
+				 }else{
+				  if(StringUtil.trim(TIsenha.text)==""){
+				  	 msg="Preencha o campo senha";
+				  }else{
+				   if(StringUtil.trim(TIconfsenha.text)==""){
+				      msg="Preencha o campo confirmar senha";
+				   }else{
+				    if(CBperfil.selectedIndex==0){
+				    	msg="Escolha o perfil de usuario";
+				    }
+				   }
+				  }
+				 }
+				}
+				
+				return msg;
+			}
+		//rotected function insert():void{
+				//$nome, $login, $senha, $perfil, $lotacao, $ramal, $email, $spark
+				//cadusu.InsertBanco(TInome.text,TIlogin.text,TIsenha.text,perfilEscolhido,TIlotacao.text,TIramal.text,TIemail.text,TIspark.text);
+			//}
+			
+			
+			protected function limpaForm():void{
+				TInome.text="";
+				TIlogin.text="";
+				TIsenha.text="";
+				TIlotacao.text="";
+				TIramal.text="";
+				TIemail.text="";
+				TIspark.text="";
+				TIconfsenha.text="";
+				CBperfil.selectedIndex = 0;
+			}
+			protected function BTcad():void{
+				if(CampoEmBranco()==""){// retorna "" se não existir campos obrigatorios em branco
+					cadusu.validarlogin(TIlogin.text);//retorna true se login já for cadastrado no sistema
+				}else{
+					Alert.show(CampoEmBranco());
+				}
+			}
+				
+				]]>
+	</mx:Script>	
+	
+	
+	
+	
+	
+	<mx:Panel width="96%" height="90%" layout="absolute" horizontalCenter="0" verticalCenter="0" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNcadastusuario" title="Cadastro de usúario" fontFamily="Times New Roman" fontSize="16">
+		<mx:Label y="32" text="Nome:*" fontFamily="Times New Roman" fontSize="16" id="LBnome" left="50" width="55"/>
+		<mx:TextInput x="137" y="30" width="75%" fontFamily="Times New Roman" fontSize="16" id="TInome"/>
+		<mx:Label y="66" text="Login:*" fontFamily="Times New Roman" fontSize="16" id="LBlogin" left="50" width="55"/>
+		<mx:TextInput x="137" y="64" width="60%" fontFamily="Times New Roman" fontSize="16" id="TIlogin"/>
+		<mx:Label y="111" text="Senha:*" fontFamily="Times New Roman" fontSize="16" id="LBsenha" left="50" width="55"/>
+		<mx:TextInput x="137" y="109" width="60%" fontFamily="Times New Roman" fontSize="16" id="TIsenha"/>
+		<mx:TextInput x="137" y="238" width="60%" fontFamily="Times New Roman" fontSize="16" id="TIlotacao"/>
+		<mx:TextInput x="137" y="272" width="60%" fontFamily="Times New Roman" fontSize="16" id="TIramal"/>
+		<mx:TextInput x="137" y="307" width="60%" fontFamily="Times New Roman" fontSize="16" id="TIemail"/>
+		<mx:TextInput x="137" y="341" width="60%" fontFamily="Times New Roman" fontSize="16" id="TIspark"/>
+		<mx:Label y="345" text="Spark:" fontFamily="Times New Roman" fontSize="16" id="Lbspark" left="53" width="52"/>
+		<mx:Label y="311" text="Email:" fontFamily="Times New Roman" fontSize="16" id="LBemail" left="53" width="52"/>
+		<mx:Label y="276" text="Ramal:" fontFamily="Times New Roman" fontSize="16" id="LBramal" left="53" width="52"/>
+		<mx:Label y="144" text="Confirmar senha:*" fontFamily="Times New Roman" fontSize="16" id="LBconfsenha" left="50"/>
+		<mx:Label y="188" text="Perfil:*" fontFamily="Times New Roman" fontSize="16" id="LBperfil" left="50" width="55"/>
+		<mx:TextInput x="190" y="142" width="60%" fontFamily="Times New Roman" fontSize="16" id="TIconfsenha"/>
+		<mx:ComboBox x="137" y="186" width="30%" fontFamily="Times New Roman" fontSize="16" id="CBperfil" dataProvider="{perfil}" close="CBperfilEscolha(event)"></mx:ComboBox>
+		<mx:Label y="242" text="Lotação:" fontFamily="Times New Roman" fontSize="16" id="LBlotacao" left="53" width="64"/>
+		<mx:Label y="390" text="¹Campos com * são de preenchimento obrigatorio." fontFamily="Times New Roman" fontSize="16" id="LBobservacao" left="53" width="346"/>
+		<mx:Label y="414" text="²O login deve ser igual ao login do AD." fontFamily="Times New Roman" fontSize="16" id="LBobservacao2" left="53" width="346"/>
+		
+		
+		<ns1:ButtonEnter label="Incluir" fontWeight="bold" id="BTincluirusu" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" horizontalCenter="0" verticalCenter="225" click="BTcad()" fontFamily="Times New Roman" fontSize="16"/>
+	</mx:Panel>
+	
+</mx:Canvas>

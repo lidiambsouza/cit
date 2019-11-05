@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNbuscaformulario" xmlns:ns1="*" initialize="inicio()">
+	
+	
+<mx:RemoteObject id="Formedt" destination="amfphp" source="php.FormEditar" fault="FalhaObRemot(event)">
+		<mx:method name="formED" result="formularioED(event)" fault="FalhaMet(event)" />
+		<mx:method name="formTituloED" result="formularioTituloED(event)" fault="FalhaMet(event)" />
+		<mx:method name="sinonimoED" result="sinonimoED(event)" fault="FalhaMet(event)" />
+		<mx:method name="UPbancoBase" result="UPbancoBaseED(event)" fault="FalhaMet(event)" />
+		<mx:method name="UPbancoSinonimo" result="UPbancoSinonimoED(event)" fault="FalhaMet(event)" />
+				
+		</mx:RemoteObject>
+		
+
+	
+	
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.events.DropdownEvent;
+			
+			[Bindable]
+			public var resulBdados:String;
+			[Bindable]
+			public var ar:Array;
+			
+			
+		protected function FalhaMet(e:FaultEvent):void{// função para falha de metodo
+		
+				Alert.show(e.message.toString());
+		}
+		protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+		}
+			
+		private function  inicio():void{
+				limpaForm();
+				ar= resulBdados.split(",");
+				Formedt.formTituloED(ar[0]);
+				Formedt.formED(ar[0]);
+				Formedt.sinonimoED(ar[0]);
+		}
+		
+		protected function limpaForm():void{
+			RTEformEDT.text="";
+			TItituloEDT.text="";
+			TAsinonimoEDT.text="";
+		}
+		protected function formularioTituloED(et:ResultEvent):void{
+			var st:String= et.result.toString();
+			TItituloEDT.text=st;
+		}
+			
+		protected function formularioED(e:ResultEvent):void{
+			var s:String= e.result.toString();
+			RTEformEDT.htmlText=s;
+		}
+		protected function sinonimoED(evt:ResultEvent):void{
+			var ss:String= evt.result.toString();
+			TAsinonimoEDT.htmlText=ss;
+		}
+		
+		protected function UPbancoBaseED(evR:ResultEvent):void{
+			var strR:String= evR.result.toString();
+			if(strR){
+				var s:String = TAsinonimoEDT.text;
+				var arry:Array= s.split(",");
+				Formedt.UPbancoSinonimo(ar[0],arry);
+			}else{
+				Alert.show("ERRO ao cadastrar Base!");
+			}
+		}
+		protected function UPbancoSinonimoED(evRE:ResultEvent):void{
+			var strRE:String= evRE.result.toString();
+			if(strRE){
+				Alert.show("Alteração realizada com sucesso!");
+				removeAllChildren();
+				addChild(new EditaForm() as DisplayObject);	
+				
+			}else{
+				Alert.show("ERRO ao cadastrar Sinonimos!");
+			}
+			//Alert.show(strRE);
+		}
+		
+		protected function BTformlEDT():void{
+			if(TItituloEDT.text==""|| RTEformEDT.text==""){
+				Alert.show("Titulo ou orientação em branco!");
+			}else{
+				if(TAsinonimoEDT.text==""){
+					Alert.show("Sinonimo em branco!");
+				
+		 		}else{	
+					Formedt.UPbancoBase(TItituloEDT.text,RTEformEDT.htmlText,ar[0]);
+		 		}
+			}
+			
+		}
+		
+		
+            
+            
+				
+				]]>
+	</mx:Script>	
+	
+	
+	
+	
+	
+	<mx:Panel width="96%" height="90%" layout="absolute" horizontalCenter="0" verticalCenter="0" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNformCIT" title="Formulario" fontFamily="Times New Roman" fontSize="16">
+		<mx:RichTextEditor title="Orientações tóxicologica" width="70%" height="90%" left="10" top="10" id="RTEformEDT" fontFamily="Times New Roman" fontSize="16">
+		</mx:RichTextEditor>
+		<mx:Label text="Sinônimos¹" id="LBsinonimoEDT" top="115" fontFamily="Times New Roman" fontSize="16" fontWeight="bold" textAlign="center" right="10" width="26%"/>
+		<mx:Label text="Título" id="LBtituloEDT" top="10" fontFamily="Times New Roman" fontSize="16" fontWeight="bold" textAlign="center" right="10" width="26%"/>
+		<ns1:ButtonEnter label="Salvar" fontWeight="bold" click="BTformlEDT()" id="BTEDTform" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" right="75" bottom="21"/>
+		<mx:TextArea width="26%" height="50%" right="10" verticalCenter="45" id="TAsinonimoEDT"/>
+		<mx:TextInput width="26%" height="24" right="10" top="43" id="TItituloEDT"/>
+		<mx:Label text="¹Separe os sinônimos usando vírgula." fontFamily="Times New Roman" fontSize="16" id="LBobservacaoEDT" left="10" width="346" bottom="5"/>
+
+	</mx:Panel>
+	
+</mx:Canvas>

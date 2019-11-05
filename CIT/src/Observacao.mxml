@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>	
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNresumoObs" xmlns:ns1="*" initialize="inicio()" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+<mx:RemoteObject id="cadres" destination="amfphp" source="php.CadastroResumo" fault="FalhaObRemot(event)">
+		<mx:method name="InsertBancoRb" result="InsertBancoRb(event)" fault="FalhaMet(event)" />
+		<mx:method name="UpdateBancoRb" result="UpdateBancoRb(event)" fault="FalhaMet(event)" />			
+		</mx:RemoteObject>
+	<mx:RemoteObject id="consultpaci" destination="amfphp" source="php.ConsultarPaciente" fault="FalhaObRemot(event)">
+		<mx:method name="SelectExist" result="SelectExist(event)" fault="FalhaMet(event)" />	
+		<mx:method name="SelectBancoV" result="SelectBancoV(event)" fault="FalhaMet(event)" />
+		
+	</mx:RemoteObject>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.events.ItemClickEvent;
+			
+			[Bindable]
+			public var IDpaciente:int;
+			[Bindable]
+			public var ObservacaoI:String;
+			
+			[Bindable]
+			public var UsuarioLogin:String;
+			
+			[Bindable]
+			public var cadOUBusc:Boolean;
+			
+			[Bindable]
+			public var Volta:Boolean;
+			
+			
+			
+			
+		protected function FalhaMet(e:FaultEvent):void{// função para falha de metodo
+		
+				Alert.show(e.message.toString());
+		}
+		protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+		}
+			
+			
+		private function  inicio():void{
+				//limpaForm();
+				consultpaci.SelectExist(IDpaciente,"resumo");
+				//if(Volta){
+					//consultpaci.SelectBancoV(IDpaciente);
+					//TAobservacao.text=ObservacaoI;
+				//}
+		}
+		protected function SelectExist(evt:ResultEvent):void{
+			if(evt.result.toString()=="true"){
+				consultpaci.SelectBancoV(IDpaciente);
+				Volta=true;
+			}else{
+				Volta=false;
+			}
+		}
+				
+		protected function SelectBancoV(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				if(s){
+					TAobservacao.text=s;
+				}else{
+					TAobservacao.text="";
+				}
+		}
+		
+		protected function proximoTela():void{
+			
+			if(cadOUBusc==true){
+				removeAllChildren();
+				var tela:LocalExposicao= new LocalExposicao();
+				tela.IDpaciente=IDpaciente;
+				tela.cadOUBusc=cadOUBusc;
+				tela.UsuarioLogin=UsuarioLogin;
+				//tela.ObservacaoS=ObservacaoI;
+				addChild(tela as DisplayObject);
+			
+			}else{
+				removeAllChildren();
+				var telaB:BuscaFOR= new BuscaFOR();
+				telaB.IDpaciente=IDpaciente;
+				telaB.cadOUBusc=cadOUBusc;
+				telaB.UsuarioLogin=UsuarioLogin;
+				//telaB.Observacao=ObservacaoI;
+				addChild(telaB as DisplayObject);
+			}
+			
+		}
+		
+		protected function BTvoltar():void{
+			removeAllChildren();
+			var tela:Solicitante = new Solicitante();
+			tela.IDpaciente=IDpaciente;
+			tela.cadOUBusc=cadOUBusc;
+			tela.UsuarioLogin=UsuarioLogin;
+			tela.Volta=true;
+			addChild(tela as DisplayObject);
+		}
+		
+		
+		
+		protected function UpdateBancoRb(evt:ResultEvent):void{
+			if(evt.result.toString()=="false"){
+				Alert.show("Erro! Dados não cadastrados!");
+				
+			}else{
+				proximoTela();
+			}
+			
+		}
+		
+		protected function InsertBancoRb(evt:ResultEvent):void{
+			//Alert.show(evt.result.toString());
+			if(evt.result.toString()=="false"){
+				Alert.show("Erro! Dados não cadastrados!");
+				
+			}else{
+				//IDpacientBanco=parseInt(evt.result.toString());
+				//Alert.show(IDpacientBanco.toString());
+				proximoTela();
+			}
+			
+		}
+		
+        protected function BTproximo():void{
+        	if(Volta){
+        		cadres.UpdateBancoRb(IDpaciente,TAobservacao.text);
+        		//proximoTelaB();
+        		
+        	}else{
+        		cadres.InsertBancoRb(IDpaciente,TAobservacao.text);
+        		//proximoTela();
+        	}
+        }
+            
+				
+				]]>
+	</mx:Script>	
+	
+	
+	
+<mx:Panel horizontalScrollPolicy="auto" verticalScrollPolicy="auto" id="PNmain" horizontalCenter="0" verticalCenter="0" width="96%" height="90%" layout="absolute">	
+	
+	<mx:Panel width="1300" height="690" layout="absolute" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNobservacao" title="Observacao" fontFamily="Times New Roman" fontSize="16" left="0" top="0">
+		
+		<mx:Label text="Observação:" id="LBobservacao" fontFamily="Times New Roman" fontSize="16" height="25" top="10" left="10" width="132"/>
+		<mx:TextArea left="10" right="10" top="45" bottom="135" id="TAobservacao"/>
+		<ns1:ButtonEnter label="Próximo" fontWeight="bold" id="BTnext" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" verticalCenter="220" fontFamily="Times New Roman" fontSize="16" width="121" height="29" click="BTproximo()" right="10"/>
+		<ns1:ButtonEnter label="Voltar" fontWeight="bold" id="BTant" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" verticalCenter="220" fontFamily="Times New Roman" fontSize="16" width="121" height="29" click="BTvoltar()" left="10"/>
+	</mx:Panel>
+</mx:Panel>	
+</mx:Canvas>

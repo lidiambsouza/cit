@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNhome">
+	<mx:Script>
+		<![CDATA[
+			
+			
+			[Bindable]
+			public var UsuarioLogin:String;
+			
+				]]>
+	</mx:Script>	
+	
+			
+	<mx:Panel width="522" height="340" layout="absolute" horizontalCenter="0" verticalCenter="0" backgroundColor="#FFFFFF" borderColor="#B7CCD0" id="PNbemvindo">
+		<mx:Label text="Bem vindo ao sistema CIT" id="LBsaudacao" color="#186494" fontWeight="bold" fontFamily="Times New Roman" fontSize="25" horizontalCenter="0" fontStyle="italic" top="20"/>
+		<mx:Image horizontalCenter="0" verticalCenter="0" source="../imagem/CITlogo.jpg" width="281" height="166"/>
+	</mx:Panel>
+	
+</mx:Canvas>
+
+
+

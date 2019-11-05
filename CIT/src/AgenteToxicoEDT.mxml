@@ -1,0 +1,638 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNagenteToxico" xmlns:ns1="*" initialize="inicio()" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	
+<mx:RemoteObject id="cadat" destination="amfphp" source="php.CadastroAgenteToxico" fault="FalhaObRemot(event)">
+			
+		<mx:method name="UpdateBancoAT" result="UpdateBancoAT(event)" fault="FalhaMet(event)" />			
+		</mx:RemoteObject>
+		
+<mx:RemoteObject id="consultpaci" destination="amfphp" source="php.ConsultarPaciente" fault="FalhaObRemot(event)">
+		<mx:method name="SelectBancoATb" result="SelectBancoATb(event)" fault="FalhaMet(event)" />	
+		<mx:method name="SelectBancoAT" result="SelectBancoAT(event)" fault="FalhaMet(event)" />
+				
+		</mx:RemoteObject>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+						
+			[Bindable]
+			public var IDpaciente:int;
+			[Bindable]
+			public var classificacaoEscolhida:String;
+			
+			
+		protected function FalhaMet(e:FaultEvent):void{// função para falha de metodo
+		
+				Alert.show(e.message.toString());
+		}
+		protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+		}
+			
+			
+		private function  inicio():void{
+				limpaForm();
+				consultpaci.SelectBancoAT(IDpaciente);
+		}
+		
+		protected function SelectBancoAT(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				var arAT:Array= s.split(",");
+				consultpaci.SelectBancoATb(IDpaciente);
+				
+				//LBclassAT.text=arAT[2];
+				switch(arAT[2]){
+					case"Medicamentos":
+						classificacao(0);
+					break;
+					case"Drogas de abuso":
+						classificacao(1);
+					break;
+					case"Agrotóxicos/ uso doméstico":
+						classificacao(2);
+					break;
+					case"Produtos químicos industriais":
+						classificacao(3);
+					break;
+					case"Produtos veterinários":
+						classificacao(4);
+					break;
+					case"Agrotóxicos/ uso agrícola":
+						classificacao(5);
+					break;
+					case"raticidas":
+						classificacao(6);
+					break;
+					case"Metais":
+						classificacao(7);
+					break;
+					case"Plantas":
+						classificacao(8);
+					break;
+					case"Alimentos":
+						classificacao(9);
+					break;
+					case"Cosméticos":
+						classificacao(10);
+					break;
+					case"Ignorada":
+						classificacao(11);
+					break;
+					case"Domissanitários":
+						classificacao(12);
+					break;
+					case"Outros animais":
+						classificacao(13);
+					break;
+					case"Animais não peçonhentos":
+						classificacao(14);
+					break;
+					case"Animais peçonhentos/venenosos":
+						classificacao(15);
+					break;
+					case"Outros":
+						classificacao(16);
+					break;				
+				}
+				
+				TIoutro.text=arAT[3];
+			}
+			protected function SelectBancoATb(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				TAagentToxico.text=s;
+			}
+		
+		protected function limpaForm():void{
+			//TIbuscanomeS.text="";
+		}
+		
+		protected function UpdateBancoAT(evt:ResultEvent):void{
+			if(evt.result.toString()=="false"){
+				Alert.show("Erro! Dados não cadastrados!");
+				
+			}else{
+				proximoTela();
+			}
+			
+		}
+		
+		protected function proximoTela():void{
+			removeAllChildren();
+			var tela:TratamentoEDT= new TratamentoEDT();
+			tela.IDpaciente=IDpaciente;			
+			addChild(tela as DisplayObject);
+		}
+		
+		protected function classificacao(flag:int):void{
+			switch(flag.toString()){
+				case "0":
+				{
+					CBmedicamento.selected=true;
+					CBdrogaabuso.selected=false;
+					CBagrodomestico.selected=false;
+					CBprodquimindus.selected=false;
+					CBproduvet.selected=false;
+					CBagroagric.selected=false;
+					CBratic.selected=false;
+					CBmetais.selected=false;
+					CBplantas.selected=false;
+					CBalimento.selected=false;
+					CBcosmetico.selected=false;
+					CBignorada.selected=false;
+					CBdomissanit.selected=false;
+					CBoutrosanimais.selected=false;
+					CBanimaisnpeconhentos.selected=false;
+					CBanimaisvenenosos.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					classificacaoEscolhida=CBmedicamento.label;
+					break;
+				}
+				case "1":
+				{
+					CBmedicamento.selected=false;
+					CBdrogaabuso.selected=true;
+					CBagrodomestico.selected=false;
+					CBprodquimindus.selected=false;
+					CBproduvet.selected=false;
+					CBagroagric.selected=false;
+					CBratic.selected=false;
+					CBmetais.selected=false;
+					CBplantas.selected=false;
+					CBalimento.selected=false;
+					CBcosmetico.selected=false;
+					CBignorada.selected=false;
+					CBdomissanit.selected=false;
+					CBoutrosanimais.selected=false;
+					CBanimaisnpeconhentos.selected=false;
+					CBanimaisvenenosos.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					classificacaoEscolhida=CBdrogaabuso.label;
+					break;
+				}
+				case "2":
+				{
+					CBmedicamento.selected=false;
+					CBdrogaabuso.selected=false;
+					CBagrodomestico.selected=true;
+					CBprodquimindus.selected=false;
+					CBproduvet.selected=false;
+					CBagroagric.selected=false;
+					CBratic.selected=false;
+					CBmetais.selected=false;
+					CBplantas.selected=false;
+					CBalimento.selected=false;
+					CBcosmetico.selected=false;
+					CBignorada.selected=false;
+					CBdomissanit.selected=false;
+					CBoutrosanimais.selected=false;
+					CBanimaisnpeconhentos.selected=false;
+					CBanimaisvenenosos.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					classificacaoEscolhida=CBagrodomestico.label;
+					break;
+				}
+				case "3":
+				{
+					CBmedicamento.selected=false;
+					CBdrogaabuso.selected=false;
+					CBagrodomestico.selected=false;
+					CBprodquimindus.selected=true;
+					CBproduvet.selected=false;
+					CBagroagric.selected=false;
+					CBratic.selected=false;
+					CBmetais.selected=false;
+					CBplantas.selected=false;
+					CBalimento.selected=false;
+					CBcosmetico.selected=false;
+					CBignorada.selected=false;
+					CBdomissanit.selected=false;
+					CBoutrosanimais.selected=false;
+					CBanimaisnpeconhentos.selected=false;
+					CBanimaisvenenosos.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					classificacaoEscolhida=CBprodquimindus.label;
+					break;
+				}
+				case "4":
+				{
+					CBmedicamento.selected=false;
+					CBdrogaabuso.selected=false;
+					CBagrodomestico.selected=false;
+					CBprodquimindus.selected=false;
+					CBproduvet.selected=true;
+					CBagroagric.selected=false;
+					CBratic.selected=false;
+					CBmetais.selected=false;
+					CBplantas.selected=false;
+					CBalimento.selected=false;
+					CBcosmetico.selected=false;
+					CBignorada.selected=false;
+					CBdomissanit.selected=false;
+					CBoutrosanimais.selected=false;
+					CBanimaisnpeconhentos.selected=false;
+					CBanimaisvenenosos.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					classificacaoEscolhida=CBproduvet.label;
+					break;
+				}
+				case "5":
+				{
+					CBmedicamento.selected=false;
+					CBdrogaabuso.selected=false;
+					CBagrodomestico.selected=false;
+					CBprodquimindus.selected=false;
+					CBproduvet.selected=false;
+					CBagroagric.selected=true;
+					CBratic.selected=false;
+					CBmetais.selected=false;
+					CBplantas.selected=false;
+					CBalimento.selected=false;
+					CBcosmetico.selected=false;
+					CBignorada.selected=false;
+					CBdomissanit.selected=false;
+					CBoutrosanimais.selected=false;
+					CBanimaisnpeconhentos.selected=false;
+					CBanimaisvenenosos.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					classificacaoEscolhida=CBagroagric.label;
+					break;
+				}
+				case "6":
+				{
+					CBmedicamento.selected=false;
+					CBdrogaabuso.selected=false;
+					CBagrodomestico.selected=false;
+					CBprodquimindus.selected=false;
+					CBproduvet.selected=false;
+					CBagroagric.selected=false;
+					CBratic.selected=true;
+					CBmetais.selected=false;
+					CBplantas.selected=false;
+					CBalimento.selected=false;
+					CBcosmetico.selected=false;
+					CBignorada.selected=false;
+					CBdomissanit.selected=false;
+					CBoutrosanimais.selected=false;
+					CBanimaisnpeconhentos.selected=false;
+					CBanimaisvenenosos.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					classificacaoEscolhida=CBratic.label;
+					break;
+				}
+				case "7":
+				{
+					CBmedicamento.selected=false;
+					CBdrogaabuso.selected=false;
+					CBagrodomestico.selected=false;
+					CBprodquimindus.selected=false;
+					CBproduvet.selected=false;
+					CBagroagric.selected=false;
+					CBratic.selected=false;
+					CBmetais.selected=true;
+					CBplantas.selected=false;
+					CBalimento.selected=false;
+					CBcosmetico.selected=false;
+					CBignorada.selected=false;
+					CBdomissanit.selected=false;
+					CBoutrosanimais.selected=false;
+					CBanimaisnpeconhentos.selected=false;
+					CBanimaisvenenosos.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					classificacaoEscolhida=CBmetais.label;
+					break;
+				}
+				case "8":
+				{
+					CBmedicamento.selected=false;
+					CBdrogaabuso.selected=false;
+					CBagrodomestico.selected=false;
+					CBprodquimindus.selected=false;
+					CBproduvet.selected=false;
+					CBagroagric.selected=false;
+					CBratic.selected=false;
+					CBmetais.selected=false;
+					CBplantas.selected=true;
+					CBalimento.selected=false;
+					CBcosmetico.selected=false;
+					CBignorada.selected=false;
+					CBdomissanit.selected=false;
+					CBoutrosanimais.selected=false;
+					CBanimaisnpeconhentos.selected=false;
+					CBanimaisvenenosos.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					classificacaoEscolhida=CBplantas.label;
+					break;
+				}
+				case "9":
+				{
+					CBmedicamento.selected=false;
+					CBdrogaabuso.selected=false;
+					CBagrodomestico.selected=false;
+					CBprodquimindus.selected=false;
+					CBproduvet.selected=false;
+					CBagroagric.selected=false;
+					CBratic.selected=false;
+					CBmetais.selected=false;
+					CBplantas.selected=false;
+					CBalimento.selected=true;
+					CBcosmetico.selected=false;
+					CBignorada.selected=false;
+					CBdomissanit.selected=false;
+					CBoutrosanimais.selected=false;
+					CBanimaisnpeconhentos.selected=false;
+					CBanimaisvenenosos.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					classificacaoEscolhida=CBalimento.label;
+					break;
+				}
+				case "10":
+				{
+					CBmedicamento.selected=false;
+					CBdrogaabuso.selected=false;
+					CBagrodomestico.selected=false;
+					CBprodquimindus.selected=false;
+					CBproduvet.selected=false;
+					CBagroagric.selected=false;
+					CBratic.selected=false;
+					CBmetais.selected=false;
+					CBplantas.selected=false;
+					CBalimento.selected=false;
+					CBcosmetico.selected=true;
+					CBignorada.selected=false;
+					CBdomissanit.selected=false;
+					CBoutrosanimais.selected=false;
+					CBanimaisnpeconhentos.selected=false;
+					CBanimaisvenenosos.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					classificacaoEscolhida=CBcosmetico.label;
+					break;
+				}
+				case "11":
+				{
+					CBmedicamento.selected=false;
+					CBdrogaabuso.selected=false;
+					CBagrodomestico.selected=false;
+					CBprodquimindus.selected=false;
+					CBproduvet.selected=false;
+					CBagroagric.selected=false;
+					CBratic.selected=false;
+					CBmetais.selected=false;
+					CBplantas.selected=false;
+					CBalimento.selected=false;
+					CBcosmetico.selected=false;
+					CBignorada.selected=true;
+					CBdomissanit.selected=false;
+					CBoutrosanimais.selected=false;
+					CBanimaisnpeconhentos.selected=false;
+					CBanimaisvenenosos.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					classificacaoEscolhida=CBignorada.label;
+					break;
+				}
+				case "12":
+				{
+					CBmedicamento.selected=false;
+					CBdrogaabuso.selected=false;
+					CBagrodomestico.selected=false;
+					CBprodquimindus.selected=false;
+					CBproduvet.selected=false;
+					CBagroagric.selected=false;
+					CBratic.selected=false;
+					CBmetais.selected=false;
+					CBplantas.selected=false;
+					CBalimento.selected=false;
+					CBcosmetico.selected=false;
+					CBignorada.selected=false;
+					CBdomissanit.selected=true;
+					CBoutrosanimais.selected=false;
+					CBanimaisnpeconhentos.selected=false;
+					CBanimaisvenenosos.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					classificacaoEscolhida=CBdomissanit.label;
+					break;
+				}
+				case "13":
+				{
+					CBmedicamento.selected=false;
+					CBdrogaabuso.selected=false;
+					CBagrodomestico.selected=false;
+					CBprodquimindus.selected=false;
+					CBproduvet.selected=false;
+					CBagroagric.selected=false;
+					CBratic.selected=false;
+					CBmetais.selected=false;
+					CBplantas.selected=false;
+					CBalimento.selected=false;
+					CBcosmetico.selected=false;
+					CBignorada.selected=false;
+					CBdomissanit.selected=false;
+					CBoutrosanimais.selected=true;
+					CBanimaisnpeconhentos.selected=false;
+					CBanimaisvenenosos.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					classificacaoEscolhida=CBoutrosanimais.label;
+					break;
+				}
+				case "14":
+				{
+					CBmedicamento.selected=false;
+					CBdrogaabuso.selected=false;
+					CBagrodomestico.selected=false;
+					CBprodquimindus.selected=false;
+					CBproduvet.selected=false;
+					CBagroagric.selected=false;
+					CBratic.selected=false;
+					CBmetais.selected=false;
+					CBplantas.selected=false;
+					CBalimento.selected=false;
+					CBcosmetico.selected=false;
+					CBignorada.selected=false;
+					CBdomissanit.selected=false;
+					CBoutrosanimais.selected=false;
+					CBanimaisnpeconhentos.selected=true;
+					CBanimaisvenenosos.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					classificacaoEscolhida=CBanimaisnpeconhentos.label;
+					break;
+				}
+				case "15":
+				{
+					CBmedicamento.selected=false;
+					CBdrogaabuso.selected=false;
+					CBagrodomestico.selected=false;
+					CBprodquimindus.selected=false;
+					CBproduvet.selected=false;
+					CBagroagric.selected=false;
+					CBratic.selected=false;
+					CBmetais.selected=false;
+					CBplantas.selected=false;
+					CBalimento.selected=false;
+					CBcosmetico.selected=false;
+					CBignorada.selected=false;
+					CBdomissanit.selected=false;
+					CBoutrosanimais.selected=false;
+					CBanimaisnpeconhentos.selected=false;
+					CBanimaisvenenosos.selected=true;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					classificacaoEscolhida=CBanimaisvenenosos.label;					
+					break;
+				}
+				case "16":
+				{
+					CBmedicamento.selected=false;
+					CBdrogaabuso.selected=false;
+					CBagrodomestico.selected=false;
+					CBprodquimindus.selected=false;
+					CBproduvet.selected=false;
+					CBagroagric.selected=false;
+					CBratic.selected=false;
+					CBmetais.selected=false;
+					CBplantas.selected=false;
+					CBalimento.selected=false;
+					CBcosmetico.selected=false;
+					CBignorada.selected=false;
+					CBdomissanit.selected=false;
+					CBoutrosanimais.selected=false;
+					CBanimaisnpeconhentos.selected=false;
+					CBanimaisvenenosos.selected=false;
+					CBoutros.selected=true;
+					TIoutro.editable=true;
+					
+					classificacaoEscolhida=CBoutros.label;					
+					break;
+				}
+				default:
+				{
+					CBmedicamento.selected=false;
+					CBdrogaabuso.selected=false;
+					CBagrodomestico.selected=false;
+					CBprodquimindus.selected=false;
+					CBproduvet.selected=false;
+					CBagroagric.selected=false;
+					CBratic.selected=false;
+					CBmetais.selected=false;
+					CBplantas.selected=false;
+					CBalimento.selected=false;
+					CBcosmetico.selected=false;
+					CBignorada.selected=false;
+					CBdomissanit.selected=false;
+					CBoutrosanimais.selected=false;
+					CBanimaisnpeconhentos.selected=false;
+					CBanimaisvenenosos.selected=false;
+					CBoutros.selected=false;
+					TIoutro.editable=false;
+					TIoutro.text="";
+					
+					classificacaoEscolhida="";
+					break;
+				}
+			
+			}		
+		}
+		
+		protected function BTproximo():void{
+			
+				cadat.UpdateBancoAT(IDpaciente,TAagentToxico.text,classificacaoEscolhida,TIoutro.text);
+			
+		}
+		protected function BTvoltar():void{
+			removeAllChildren();
+			var tela:ExposicaoEDT =new ExposicaoEDT();			
+			tela.IDpaciente=IDpaciente;			
+			addChild(tela as DisplayObject);
+		}   	
+            
+            
+				
+				]]>
+	</mx:Script>	
+	
+	
+	
+<mx:Panel horizontalScrollPolicy="auto" verticalScrollPolicy="auto" id="PNmain" horizontalCenter="0" verticalCenter="0" width="96%" height="90%" layout="absolute">	
+	
+	<mx:Panel width="1300" height="690" layout="absolute" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNagenteToxico" title="Agente Tóxico" fontFamily="Times New Roman" fontSize="16" left="0" top="0" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+		<mx:TextArea height="253" left="10" right="10" top="47" id="TAagentToxico"/>
+		<mx:Label text="Nome comercial / Espécie" id="LBncomercesp" fontFamily="Times New Roman" fontSize="16" width="203" height="25" top="10" left="10"/>
+		<mx:Label text="Dose/ quantidade" id="LBdosequant" fontFamily="Times New Roman" fontSize="16" width="143" height="25" top="10" left="250"/>
+		<mx:Label text="Princípio ativo" id="LBprincativ" fontFamily="Times New Roman" fontSize="16" height="25" top="10" left="430" width="143"/>
+		<mx:Label text="Classificação:" id="LBclassificacao" fontFamily="Times New Roman" fontSize="16" width="121" height="25" top="345" left="10"/>
+		<mx:CheckBox label="Animais não peçonhentos" id="CBanimaisnpeconhentos" fontFamily="Times New Roman" fontSize="16" top="378" left="1049" width="195" click="classificacao(14)"/>
+		<mx:CheckBox label="Outros" id="CBoutros" fontFamily="Times New Roman" fontSize="16" width="121" top="450" left="10" height="29" click="classificacao(16)"/>
+		<mx:CheckBox label="Drogas de abuso" id="CBdrogaabuso" fontFamily="Times New Roman" fontSize="16" width="133" top="413" left="10" click="classificacao(1)"/>
+		<mx:CheckBox label="Cosméticos" id="CBcosmetico" fontFamily="Times New Roman" fontSize="16" width="107" top="378" left="785" click="classificacao(10)"/>
+		<mx:CheckBox id="CBagroagric" fontFamily="Times New Roman" fontSize="16" label="Agrotóxicos/ uso agrícola" width="185" top="413" left="387" click="classificacao(5)"/>
+		<mx:CheckBox label="Medicamentos" id="CBmedicamento" fontFamily="Times New Roman" fontSize="16" width="121" top="378" left="10" click="classificacao(0)"/>
+		<mx:CheckBox label="Alimentos" id="CBalimento" fontFamily="Times New Roman" fontSize="16" width="92" top="413" left="683" click="classificacao(9)"/>
+		<mx:CheckBox label="Plantas" id="CBplantas" fontFamily="Times New Roman" fontSize="16" width="92" top="378" left="683" click="classificacao(8)"/>
+		<mx:CheckBox label="Domissanitários" id="CBdomissanit" fontFamily="Times New Roman" fontSize="16" width="130" top="378" left="902" click="classificacao(12)"/>
+		<mx:CheckBox id="CBprodquimindus" fontFamily="Times New Roman" fontSize="16" label="Produtos químicos industriais" width="204" top="413" left="159" click="classificacao(3)"/>
+		<mx:CheckBox label="Agrotóxicos/ uso doméstico" id="CBagrodomestico" fontFamily="Times New Roman" fontSize="16" width="204" top="378" left="159" click="classificacao(2)"/>
+		<mx:CheckBox label="Animais peçonhentos/venenosos" id="CBanimaisvenenosos" fontFamily="Times New Roman" fontSize="16" width="232" top="413" left="1049" click="classificacao(15)"/>
+		<mx:CheckBox label="Metais" id="CBmetais" fontFamily="Times New Roman" fontSize="16" width="73" top="413" left="588" click="classificacao(7)"/>
+		<mx:CheckBox label="Ignorada" id="CBignorada" fontFamily="Times New Roman" fontSize="16" width="94" top="413" left="785" click="classificacao(11)"/>
+		<mx:CheckBox label="Outros animais" id="CBoutrosanimais" fontFamily="Times New Roman" fontSize="16" width="130" top="413" left="902" click="classificacao(13)"/>
+		<mx:CheckBox id="CBratic" fontFamily="Times New Roman" fontSize="16" label="raticidas" width="83" top="378" left="588" click="classificacao(6)"/>
+		<mx:CheckBox label="Produtos veterinários" id="CBproduvet" fontFamily="Times New Roman" fontSize="16" width="164" top="378" left="387" click="classificacao(4)"/>
+		<mx:TextInput width="720" id="TIoutro" fontFamily="Times New Roman" fontSize="16" top="450" left="159" height="29" editable="false"/>
+		<ns1:ButtonEnter label="Próximo" fontWeight="bold" id="BTnext" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" verticalCenter="220" fontFamily="Times New Roman" fontSize="16" width="121" height="29" click="BTproximo()" right="10"/>
+		<ns1:ButtonEnter label="Voltar" fontWeight="bold" id="BTant" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" verticalCenter="220" fontFamily="Times New Roman" fontSize="16" width="121" height="29" click="BTvoltar()" left="10"/>
+
+	</mx:Panel>
+</mx:Panel>	
+</mx:Canvas>

@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" 
+	width="100%" height="100%" backgroundColor="#EFECEC" initialize="inicio()" 
+	xmlns:ns1="*" backgroundImage="@Embed(source='../imagem/Novo_selo.jpg')">
+		<mx:RemoteObject id="login" destination="amfphp" source="php.Login" fault="FalhaObRemot(event)">
+			<mx:method name="ldap" result="getLoginLdap(event)" fault="FalhaMet(event)" />
+			<mx:method name="banoouldap" result="BancoOuLdap(event)" fault="FalhaMet(event)" />
+			<mx:method name="LogBanco" result="getLogBanco(event)" fault="FalhaMet(event)" />
+			<mx:method name="verificarPerfil" result="verificarPerfil(event)" fault="FalhaMet(event)" />
+		</mx:RemoteObject>
+		
+
+	
+	
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.menuClasses.MenuBarItem;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.events.MenuEvent;
+			[Bindable]
+			public var UsuarioLoginI:String;//usuario logado
+			
+			protected var FlagBL:Boolean;
+			
+			//função inicial, carrega junto com o arquivo flex
+			private function  inicio():void{
+				//limpaForm();
+				removeAllChildren();
+				addChild(LBversao);
+				addChild(PNlogin);	
+				TIusuario.text="";
+				TIsenha.text="";		
+			} 
+			//falha metodo
+			protected function FalhaMet(e:FaultEvent):void// função para falha de metodo
+			{
+				Alert.show(e.message.toString());
+			}
+			//falha objeto
+			protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+			}
+			//banco ou ad
+			protected function BancoOuLdap(e:ResultEvent):void{
+				
+				FlagBL = e.result;
+				
+				if(FlagBL==true){
+					
+					if(TIsenha.text=="" || TIusuario.text==""){
+						Alert.show("Usuario ou senha em branco");
+					}else{
+						login.ldap(TIusuario.text,TIsenha.text);
+						
+					}
+				}else{
+					
+					if(TIusuario.text=="" || TIsenha.text==""){
+						Alert.show("Usuario ou senha em branco");
+					}else{
+						login.LogBanco(TIusuario.text,TIsenha.text);
+						
+					}
+				}
+				
+			}
+			//permissao de usuario
+			protected function verificarPerfil(ev:ResultEvent):void{
+				//Alert.show(ev.result.toString());
+				TIusuario.text="";
+				TIsenha.text="";
+				if(ev.result.toString()=="false"){
+					Alert.show("Usuario não habilitado!");//parei aqui
+					inicio();
+					
+				}else{
+				switch(ev.result.toString()){
+					
+					case "1"://adm
+					{
+						menuPrincipal.dataProvider[0].menuitem[0].@enabled= true;//usuario
+						menuPrincipal.dataProvider[0].menuitem[1].@enabled= true;
+						
+						menuPrincipal.dataProvider[1].menuitem[0].@enabled= true;//formulario
+						menuPrincipal.dataProvider[1].menuitem[1].@enabled= true;
+						menuPrincipal.dataProvider[1].menuitem[2].@enabled= true;
+						
+						menuPrincipal.dataProvider[2].menuitem[0].@enabled= true;//paciente
+						menuPrincipal.dataProvider[2].menuitem[1].@enabled= true;
+						menuPrincipal.dataProvider[2].menuitem[2].@enabled= true;
+						menuPrincipal.dataProvider[2].menuitem[3].@enabled= true;
+												
+						menuPrincipal.dataProvider[3].menuitem[0].@enabled= true;//relatorio
+						menuPrincipal.dataProvider[3].menuitem[1].@enabled= true;
+						menuPrincipal.dataProvider[3].menuitem[2].@enabled= true;
+						menuPrincipal.dataProvider[3].menuitem[3].@enabled= true;
+						menuPrincipal.dataProvider[3].menuitem[4].@enabled= true;
+						
+						menuPrincipal.dataProvider[4].menuitem[0].@enabled= true;//outros
+						menuPrincipal.dataProvider[4].menuitem[1].@enabled= true;
+						menuPrincipal.dataProvider[4].menuitem[2].@enabled= true;
+						menuPrincipal.dataProvider[4].menuitem[3].@enabled= true;
+						
+					break;
+					
+					}	
+					
+					case "2"://editor
+					{
+						menuPrincipal.dataProvider[0].menuitem[0].@enabled= false;//usuario
+						menuPrincipal.dataProvider[0].menuitem[1].@enabled= false;
+						
+						menuPrincipal.dataProvider[1].menuitem[0].@enabled= true;//formulario
+						menuPrincipal.dataProvider[1].menuitem[1].@enabled= true;
+						menuPrincipal.dataProvider[1].menuitem[2].@enabled= true;
+						
+						menuPrincipal.dataProvider[2].menuitem[0].@enabled= true;//paciente
+						menuPrincipal.dataProvider[2].menuitem[1].@enabled= true;
+						menuPrincipal.dataProvider[2].menuitem[2].@enabled= true;
+						menuPrincipal.dataProvider[2].menuitem[3].@enabled= true;
+						
+						menuPrincipal.dataProvider[3].menuitem[0].@enabled= true;//relatorio
+						menuPrincipal.dataProvider[3].menuitem[1].@enabled= true;
+						menuPrincipal.dataProvider[3].menuitem[2].@enabled= true;
+						menuPrincipal.dataProvider[3].menuitem[3].@enabled= true;
+						menuPrincipal.dataProvider[3].menuitem[4].@enabled= true;
+						
+						menuPrincipal.dataProvider[4].menuitem[0].@enabled= false;//outros
+						menuPrincipal.dataProvider[4].menuitem[1].@enabled= true;
+						menuPrincipal.dataProvider[4].menuitem[2].@enabled= true;
+						menuPrincipal.dataProvider[4].menuitem[3].@enabled= true;
+					break;
+					
+					}	
+										
+					case "3"://consultor
+					{
+						menuPrincipal.dataProvider[0].menuitem[0].@enabled= false;//usuario
+						menuPrincipal.dataProvider[0].menuitem[1].@enabled= false;
+						
+						menuPrincipal.dataProvider[1].menuitem[0].@enabled= false;//formulario
+						menuPrincipal.dataProvider[1].menuitem[1].@enabled= true;
+						menuPrincipal.dataProvider[1].menuitem[2].@enabled= false;
+						
+						menuPrincipal.dataProvider[2].menuitem[0].@enabled= true;//paciente
+						menuPrincipal.dataProvider[2].menuitem[1].@enabled= true;
+						menuPrincipal.dataProvider[2].menuitem[2].@enabled= true;
+						menuPrincipal.dataProvider[2].menuitem[3].@enabled= true;
+												
+						menuPrincipal.dataProvider[3].menuitem[0].@enabled= false;//relatorio
+						menuPrincipal.dataProvider[3].menuitem[1].@enabled= false;
+						menuPrincipal.dataProvider[3].menuitem[2].@enabled= false;
+						menuPrincipal.dataProvider[3].menuitem[3].@enabled= false;
+						menuPrincipal.dataProvider[3].menuitem[4].@enabled= false;
+						
+						menuPrincipal.dataProvider[4].menuitem[0].@enabled= false;//outros
+						menuPrincipal.dataProvider[4].menuitem[1].@enabled= true;
+						menuPrincipal.dataProvider[4].menuitem[2].@enabled= true;
+						menuPrincipal.dataProvider[4].menuitem[3].@enabled= true;
+					break;
+					
+					}	
+						
+					default:
+						menuPrincipal.dataProvider[0].menuitem[0].@enabled= false;//usuario
+						menuPrincipal.dataProvider[0].menuitem[1].@enabled= false;
+						
+						menuPrincipal.dataProvider[1].menuitem[0].@enabled= false;//formulario
+						menuPrincipal.dataProvider[1].menuitem[1].@enabled= false;
+						menuPrincipal.dataProvider[1].menuitem[2].@enabled= false;
+						
+						menuPrincipal.dataProvider[2].menuitem[0].@enabled= false;//paciente
+						menuPrincipal.dataProvider[2].menuitem[1].@enabled= false;
+						menuPrincipal.dataProvider[2].menuitem[2].@enabled= false;
+						menuPrincipal.dataProvider[2].menuitem[3].@enabled= false;
+												
+						menuPrincipal.dataProvider[3].menuitem[0].@enabled= false;//relatorio
+						menuPrincipal.dataProvider[3].menuitem[1].@enabled= false;
+						menuPrincipal.dataProvider[3].menuitem[2].@enabled= false;
+						menuPrincipal.dataProvider[3].menuitem[3].@enabled= false;
+						menuPrincipal.dataProvider[3].menuitem[4].@enabled= false;
+						
+						menuPrincipal.dataProvider[4].menuitem[0].@enabled= false;//outros
+						menuPrincipal.dataProvider[4].menuitem[1].@enabled= false;
+						menuPrincipal.dataProvider[4].menuitem[2].@enabled= false;
+						menuPrincipal.dataProvider[4].menuitem[3].@enabled= false;
+					break;
+					}
+				}
+			}
+			//logando pelo ad
+			protected function getLoginLdap(e:ResultEvent):void// função da resposta ldap do php
+			{
+				if(e.result.toString()=="0"){// teste de usuario e senha no ldap
+					Alert.show("Usuario ou senha incorreto!");
+				}else{
+					login.verificarPerfil(TIusuario.text);					
+					var hm:Home = new Home();
+					trocaTela(hm as DisplayObject);
+					
+					
+					
+				}
+			}
+			//logando pelo banco
+			protected function getLogBanco(e:ResultEvent):void// função da resposta banco do php
+			{
+				if(e.result.toString()!="0"){
+					if(e.result.toString()=="false"){// teste de usuario e senha no banco
+						Alert.show("Usuario ou senha incorreto!");
+					}else{
+						
+						login.verificarPerfil(TIusuario.text);
+						var hm:Home = new Home();
+						hm.UsuarioLogin=UsuarioLoginI;
+						trocaTela(hm as DisplayObject);
+					}
+				}else{
+					Alert.show("Usuario não cadastrado no sistema!");
+				}
+			}
+			
+			//ação do botão logar
+			protected  function BTLogar():void{// função do botão logar
+				UsuarioLoginI = TIusuario.text;
+				login.banoouldap();//banco ou AD
+				
+				
+			}
+			//função para troca de painel
+			protected function trocaTela(painel:DisplayObject):void{
+				removeAllChildren();
+				
+				addChild(painel);
+				addChild(menuPrincipal);				
+				
+				
+			}
+			
+			
+			
+			//ação do menu.
+			protected  function MenuAcao(e:MenuEvent):void{
+				var op:String = e.label;
+				
+				switch(op){
+					
+					case "Cadastro de Usuário":						
+						trocaTela(new CadastroUS() as DisplayObject);	
+						break;
+					
+					case "Busca de Usuário":				
+						trocaTela(new BuscaUS() as DisplayObject);									
+						break;
+					
+					case "Busca de Orientação":							
+						var telaB:Paciente= new Paciente();
+						telaB.cadOUBusc=false;
+						telaB.UsuarioLogin=UsuarioLoginI;			
+						trocaTela( telaB as DisplayObject);
+						break;
+										
+					case "Cadastro de Orientação":						
+						trocaTela(new CadastroFOR() as DisplayObject);
+						break;
+					
+					case "Editar Orientação":						
+						trocaTela( new EditaForm() as DisplayObject);
+						break;
+						
+					case "Cadastro de Paciente":
+						var telaC:Paciente= new Paciente();
+						telaC.cadOUBusc=true;
+						telaC.UsuarioLogin=UsuarioLoginI;
+						trocaTela( telaC as DisplayObject);
+						break;	
+						
+					case "Busca de Paciente":						
+						var telaBP:BuscaPaciente=new BuscaPaciente();
+						telaBP.buOUevo=true;
+						trocaTela( telaBP as DisplayObject);
+						break;
+							
+					case "Evolução do paciente":
+						var telaEP:BuscaPaciente=new BuscaPaciente();
+						telaEP.buOUevo=false;
+						trocaTela( telaEP as DisplayObject);
+						break;
+					
+					case "Editar Prontuário do paciente":
+						var telaBe:BuscaPacienteEDT= new BuscaPacienteEDT();						
+						telaBe.UsuarioLogin=UsuarioLoginI;			
+						trocaTela( telaBe as DisplayObject);						
+					break;
+						
+					case "Relátorio de atendimento por agente tóxico":			
+						Alert.show("Relátorio de atendimento por agente tóxico");						
+						break;
+								
+					case "Relátorio por agente tóxico e circunstância":			
+						Alert.show("Relátorio por agente tóxico e circunstância");
+						break;
+								
+					case "Relátorio por agente tóxico e faixa etária":			
+						Alert.show("Relátorio por agente tóxico e faixa etária");						
+						break;
+						
+					case "Relátorio por agente tóxico e sexo":			
+						Alert.show("Relátorio por agente tóxico e sexo");						
+						break;
+						
+					case "Relátorio por agente tóxico e evolução":			
+						Alert.show("Relátorio por agente tóxico e evolução");						
+						break;
+																	
+					case "Configuração do sistema":			
+						Alert.show("Configuração do sistema");						
+						break;
+					
+					case "Ajuda":						
+						trocaTela(new Ajuda() as DisplayObject);
+						break;
+					
+					case "Sobre":						
+						trocaTela(new Sobre() as DisplayObject);						
+						break;
+					
+					case "Sair":
+						UsuarioLoginI="";					
+						inicio();											
+						break;
+										
+					default:
+						break;
+				}
+				
+			}
+			
+			
+			
+			
+		]]>
+	</mx:Script>
+	<mx:Panel width="404" height="198" layout="absolute" backgroundColor="#E9F4F6" borderColor="#B7CCD0" horizontalCenter="0" id="PNlogin" verticalCenter="-32">
+		
+		<mx:Label x="30" y="33" text="Usuario:" id="TXusuario" color="#186494" fontWeight="bold" fontFamily="Times New Roman" fontSize="16"/>
+		<mx:Label x="30" y="75" text="Senha:" id="TXsenha" color="#186494" fontWeight="bold" fontFamily="Times New Roman" fontSize="16"/>
+		<mx:TextInput y="31" backgroundColor="#E4DEDE" horizontalCenter="49" id="TIusuario" borderColor="#ACBCC7" fontFamily="Times New Roman" fontSize="16" width="198"/>
+		<mx:TextInput y="73" backgroundColor="#E4DEDE" horizontalCenter="49" id="TIsenha" displayAsPassword="true" enter="BTLogar();" borderColor="#ACBCC7" fontFamily="Times New Roman" fontSize="16" width="198"/>
+		<ns1:ButtonEnter y="115" label="Entrar" fontWeight="bold" horizontalCenter="35" click="BTLogar();" id="BTentrar" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" fontFamily="Times New Roman" fontSize="16"/>
+	</mx:Panel>
+	
+	 
+		<mx:MenuBar id="menuPrincipal"  width="100%" height="5%" itemClick="MenuAcao(event)"
+				labelField="@label" horizontalCenter="0" fontFamily="Times New Roman" fontSize="16" color="#0C333B">
+			<mx:XMLList>	
+				
+				<menuitem label="Usuário">
+					<menuitem label="Cadastro de Usuário" />
+					<menuitem label="Busca de Usuário"/>								
+				</menuitem>
+						
+				<menuitem label="Orientação CIT">
+					<menuitem label="Cadastro de Orientação" />	
+					<menuitem label="Busca de Orientação"/>	
+					<menuitem label="Editar Orientação"/>
+				</menuitem>
+				
+				<menuitem label="Prontuario Paciente">
+					<menuitem label="Cadastro de Paciente" />	
+					<menuitem label="Busca de Paciente"/>	
+					<menuitem label="Evolução do paciente"/>
+					<menuitem label="Editar Prontuário do paciente"/>
+				</menuitem>
+				
+				<menuitem label="Relátorio">
+					<menuitem label="Relátorio de atendimento por agente tóxico" />
+					<menuitem label="Relátorio por agente tóxico e circunstância"/>
+					<menuitem label="Relátorio por agente tóxico e faixa etária"/>
+					<menuitem label="Relátorio por agente tóxico e sexo"/>
+					<menuitem label="Relátorio por agente tóxico e evolução"/>
+				</menuitem>
+								
+				<menuitem label="Suporte">
+					<menuitem label="Configuração do sistema"/>
+					<menuitem label="Ajuda"/>
+					<menuitem label="Sobre"/>
+					<menuitem label="Sair"/>
+				</menuitem>
+				
+				
+			</mx:XMLList>
+		
+		</mx:MenuBar>
+	
+	
+		<mx:Label text=" © CIT 2015 v. 1.0.1" fontFamily="Times New Roman" fontSize="14" id="LBversao" width="129" horizontalCenter="0" verticalCenter="83"/>
+	
+	
+	
+	
+
+	
+	
+</mx:Application>

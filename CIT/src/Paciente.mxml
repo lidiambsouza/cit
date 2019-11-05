@@ -1,0 +1,659 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%" backgroundColor="#EFECEC" label="CNbuscaformulario" xmlns:ns1="*" initialize="inicio()" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	
+	<mx:RemoteObject id="cadpaci" destination="amfphp" source="php.CadastroPaciente" fault="FalhaObRemot(event)">
+		<mx:method name="InsertBancoP" result="InsertBancoP(event)" fault="FalhaMet(event)" />	
+		<mx:method name="UltimoNumeroID" result="UltimoNumeroID(event)" fault="FalhaMet(event)" />
+		<mx:method name="UpdateBancoP" result="UpdateBancoP(event)" fault="FalhaMet(event)" />
+			
+		</mx:RemoteObject>
+	
+	<mx:RemoteObject id="consultpaci" destination="amfphp" source="php.ConsultarPaciente" fault="FalhaObRemot(event)">
+		<mx:method name="SelectBancoP" result="SelectBancoP(event)" fault="FalhaMet(event)" />
+		<mx:method name="SelectExist" result="SelectExist(event)" fault="FalhaMet(event)" />
+		</mx:RemoteObject>
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.events.DropdownEvent;
+			import mx.utils.StringUtil;
+			
+			[Bindable]
+			public var cadOUBusc:Boolean;
+			
+			[Bindable]
+			public var Volta:Boolean;
+			
+			[Bindable]
+			public var UsuarioLogin:String;
+			
+			protected var estadoEscolhido:String;
+			protected var semanaEscolhido:String;
+			
+			[Bindable]
+			public var IDpacientBanco:int;
+			
+			[Bindable]
+			public var resulBuscaF:ArrayCollection;
+			
+			private var dat:String = "00/00/0000";
+			
+			[Bindable]
+			public var semana:ArrayCollection = new ArrayCollection(
+                [ {label:"Selecione o dia...", data:0},{label:"Domingo", data:1},
+                	{label:"Segunda-feira", data:2},{label:"Terça-feira", data:3},
+                	{label:"Quarta-feira", data:4},{label:"Quinta-feira", data:5},
+                	{label:"Sexta-feira", data:6},{label:"Sábado", data:7}]);
+			
+			[Bindable]
+			public var estado:ArrayCollection = new ArrayCollection(
+                [ {label:"Selecione o Estado...", data:0},{label:"Acre", data:1},
+                	{label:"Alagoas", data:2},{label:"Amapá", data:3},
+                	{label:"Amazonas", data:4},{label:"Bahia", data:5},
+                	{label:"Ceará", data:6},{label:"Distrito Federal", data:7},
+                	{label:"Espírito Santo", data:8},{label:"Goiás", data:9},
+                	{label:"Maranhão", data:10},{label:"Mato Grosso", data:11},
+                	{label:"Mato Grosso do Sul", data:12},{label:"Minas Gerais", data:13},
+                	{label:"Pará", data:14},{label:"Paraíba", data:15},
+                	{label:"Paraná", data:16},{label:"Pernambuco", data:17},
+                	{label:"Piauí", data:18},{label:"Rio de Janeiro", data:19},
+                	{label:"Rio Grande do Norte", data:20},{label:"Rio Grande do Sul", data:21},
+                	{label:"Rondônia", data:22},{label:"Roraima", data:23},
+                	{label:"Santa Catarina", data:24},{label:"São Paulo", data:25},
+                  {label:"Sergipe", data:26},{label:"Tocantins", data:27} ]);
+			
+			
+		protected function FalhaMet(e:FaultEvent):void{// função para falha de metodo
+		
+				Alert.show(e.message.toString());
+		}
+		protected function FalhaObRemot(event:FaultEvent):void{// função falha de objeto
+				
+				Alert.show("ob:"+ event.fault.faultString);
+				
+		}			
+			
+		private function  inicio():void{
+				//limpaForm();				
+				//consultpaci.SelectBancoP(IDpacientBanco);
+				consultpaci.SelectExist(IDpacientBanco,"paciente");
+				
+		}
+		protected function SelectExist(evt:ResultEvent):void{
+			if(evt.result.toString()=="true"){
+				consultpaci.SelectBancoP(IDpacientBanco);
+				Volta=true;
+			}else{
+				cadpaci.UltimoNumeroID();
+				Volta=false;
+			}
+		}
+		
+		
+		private function findIndex(dp:ArrayCollection, prop:String, what:String ):int {
+			for(var k:int=0; k<dp.length; k++) {
+				if(String(dp.getItemAt(k)[prop])==what) return k;
+			}
+			return -1;
+		}
+		protected function SelectBancoP(evt:ResultEvent):void{
+				var s:String= evt.result.toString();
+				var arP:Array= s.split(",");
+				TInomepaciente.text=arP[1];
+				if(arP[2]=="Masculino"){
+					sexo(0);
+				}
+				if(arP[2]=="Feminino"){
+					sexo(1);
+				}
+				if(arP[2]=="Ignorado"){
+					sexo(2);
+				}			
+				TIidade.text=arP[3];
+				switch(arP[4]){
+					case"Hora":
+						idade(0);
+					break;
+					case"Dia":
+						idade(1);
+					break;
+					case"Mês":
+						idade(2);
+					break;
+					case"Ano":
+						idade(3);
+					break;
+				
+				}
+				if(arP[5]==0){
+					TIpeso.text="";
+				}else{
+					TIpeso.text=arP[5];
+				}
+				if(arP[6]==0){
+					TIddd.text="";
+				}else{
+					TIddd.text=arP[6];
+				}
+				TItelefone.text=arP[7];
+				TIprofissao.text=arP[10];
+				
+				switch(arP[9]){
+					case"Não":
+						gestante(0);
+					break;
+					case"ignorado":
+						gestante(1);
+					break;
+					case"Não se aplica":
+						gestante(2);
+					break;				
+				}				
+				TIespecie.text=arP[8];
+				
+				switch(arP[11]){
+					case"1º trim":
+						gestanteTempo(0);
+					break;
+					case"2º trim":
+						gestanteTempo(1);
+					break;
+					case"3º trim":
+						gestanteTempo(2);
+					break;
+					case"Trim. Desc.":
+						gestanteTempo(3);
+					break;
+				
+				}
+				
+						
+				
+				//LBestadoR.text=arP[12];
+				
+				TImunicipio.text=arP[13];
+				TIendereco.text=arP[15];
+				TInumero.text=arP[16];
+				switch(arP[17]){
+					case"Humana":
+						vitima(0);
+					break;
+					case"Animal":
+						vitima(1);
+					break;
+					case"Informação":
+						vitima(2);
+					break;				
+				}
+								
+				TIbairro.text=arP[14];
+				TIcentro.text=arP[18];
+				TInumeroID.text=arP[19];
+				
+				DFdata.text=dataformatarP(arP[20]);	
+				
+				TIhoraID.text=horaformatarP(arP[22]);
+				UsuarioLogin=arP[23];
+				CBOXEstado.selectedIndex=findIndex(estado,"label",arP[12]);
+				estadoEscolhido=CBOXEstado.selectedItem.label;	
+				
+				CBOXsemana.selectedIndex=findIndex(semana,"label",arP[21]);
+				semanaEscolhido=CBOXsemana.selectedItem.label;
+				//LBsemR.text=arP[21];
+				
+			}
+		protected function horaformatarP(hr:String):String{
+			var ht:String= hr.substr(0,2)+":"+hr.substr(3,2);
+			return ht;
+		}
+		protected function dataformatarP(dt:String):String{
+			var st:String=dt.substr(8,2)+"/"+dt.substr(5,2)+"/"+dt.substr(0,4);//ddmmyyyy
+			return st;
+		
+		}
+		protected function UltimoNumeroID(evt:ResultEvent):void{
+			
+			TInumeroID.text=evt.result.toString();
+		}
+		
+		protected function InsertBancoP(evt:ResultEvent):void{
+			if(evt.result.toString()=="false"){
+				Alert.show("Erro! Dados não cadastrados!");
+				
+			}else{
+				IDpacientBanco=parseInt(evt.result.toString());
+				//Alert.show(IDpacientBanco.toString());
+				proximoTela();
+			}
+			
+		}
+		
+		protected function UpdateBancoP(evt:ResultEvent):void{
+			if(evt.result.toString()=="false"){
+				Alert.show("Erro! Dados não cadastrados!");
+				
+			}else{
+				proximoTela();
+			}
+			
+		}
+		
+		protected function proximoTela():void{
+			removeAllChildren();
+			var tela:Solicitante = new Solicitante();
+			tela.IDpaciente=IDpacientBanco;
+			tela.cadOUBusc=cadOUBusc;
+			tela.UsuarioLogin=UsuarioLogin;
+			addChild(tela as DisplayObject);
+		}
+		
+		protected function sexo(flag:int):void{
+			if(flag==0){
+				CBsexoM.selected=true;
+				CBsexoF.selected=false;
+				CBsexoI.selected=false;
+				
+			}else{
+				if(flag==1){
+					CBsexoM.selected=false;
+					CBsexoF.selected=true;
+					CBsexoI.selected=false;
+				}else{
+					if(flag==2){
+						CBsexoI.selected=true;
+						CBsexoM.selected=false;
+						CBsexoF.selected=false;
+					}else{
+						CBsexoM.selected=false;
+						CBsexoF.selected=false;
+						CBsexoI.selected=false;
+					}
+				}
+			}
+		
+		
+		}
+		
+		protected function idade(flag:int):void{
+			if(flag==0){
+				CBidadehora.selected=true;
+				CBidadedia.selected=false;
+				CBidademes.selected=false;
+				CBidadeano.selected=false;
+				
+			}else{
+				if(flag==1){
+					CBidadehora.selected=false;
+					CBidadedia.selected=true;
+					CBidademes.selected=false;
+					CBidadeano.selected=false;
+				}else{
+					if(flag==2){
+						CBidadehora.selected=false;
+						CBidadedia.selected=false;
+						CBidademes.selected=true;
+						CBidadeano.selected=false;
+					}else{
+						if(flag==3){
+							CBidadehora.selected=false;
+							CBidadedia.selected=false;
+							CBidademes.selected=false;
+							CBidadeano.selected=true;
+						}else{
+							CBidadehora.selected=false;
+							CBidadedia.selected=false;
+							CBidademes.selected=false;
+							CBidadeano.selected=false;
+						}
+					}
+				}
+			}
+		
+		
+		}
+		
+		protected function gestante(flag:int):void{
+			if(flag==0){
+				CBgestNao.selected=true;
+				CBgesignorado.selected=false;
+				CBgestAplica.selected=false;
+								
+			}else{
+				if(flag==1){
+					CBgestNao.selected=false;
+					CBgesignorado.selected=true;
+					CBgestAplica.selected=false;
+					
+				}else{
+					if(flag==2){
+						CBgestNao.selected=false;
+						CBgesignorado.selected=false;
+						CBgestAplica.selected=true;
+						
+					}else{
+						CBgestNao.selected=false;
+						CBgesignorado.selected=false;
+						CBgestAplica.selected=false;
+													
+					}
+				}
+			}
+		
+		
+		}
+		
+		protected function gestanteTempo(flag:int):void{
+			if(flag==0){
+				CBtrim1.selected=true;
+				CBtrim2.selected=false;
+				CBtrim3.selected=false;
+				CBtrim4.selected=false;
+				
+			}else{
+				if(flag==1){
+					CBtrim1.selected=false;
+					CBtrim2.selected=true;
+					CBtrim3.selected=false;
+					CBtrim4.selected=false;
+				}else{
+					if(flag==2){
+						CBtrim1.selected=false;
+						CBtrim2.selected=false;
+						CBtrim3.selected=true;
+						CBtrim4.selected=false;
+					}else{
+						if(flag==3){
+							CBtrim1.selected=false;
+							CBtrim2.selected=false;
+							CBtrim3.selected=false;
+							CBtrim4.selected=true;
+						}else{
+							CBtrim1.selected=false;
+							CBtrim2.selected=false;
+							CBtrim3.selected=false;
+							CBtrim4.selected=false;
+						}
+					}
+				}
+			}
+		
+		
+		}	
+		
+		protected function vitima(flag:int):void{
+			if(flag==0){
+				CBhumana.selected=true;
+				CBanimal.selected=false;
+				CBinformacao.selected=false;
+								
+			}else{
+				if(flag==1){
+					CBhumana.selected=false;
+					CBanimal.selected=true;
+					CBinformacao.selected=false;
+					
+				}else{
+					if(flag==2){
+						CBhumana.selected=false;
+						CBanimal.selected=false;
+						CBinformacao.selected=true;
+						
+					}else{
+						CBhumana.selected=false;
+						CBanimal.selected=false;
+						CBinformacao.selected=false;
+													
+					}
+				}
+			}
+		
+		
+		}	
+		
+		protected function CampoEmBranco():String{
+				var msg:String="";
+			
+				if(StringUtil.trim(TInomepaciente.text)==""){
+					msg="Preencha o campo nome";
+				}else{
+				 if(StringUtil.trim(TIidade.text)==""){
+				 	msg="Preencha o campo idade";
+				 }else{
+				  if(StringUtil.trim(TIprofissao.text)==""){
+				  	 msg="Preencha o campo profissão";
+				  }else{
+				   if(StringUtil.trim(TImunicipio.text)==""){
+				      msg="Preencha o campo municipio";
+				   }else{
+				    if(CBOXEstado.selectedIndex==0){
+				    	msg="Escolha o estado";
+				    }else{
+				     if(CBsexoF.selected==false && CBsexoM.selected==false && CBsexoI.selected==false){
+				     	msg="Escolha o sexo";
+				     }else{
+				     	if(CBidadedia.selected==false && CBidadehora.selected==false && CBidadeano.selected==false && CBidademes.selected==false){
+				     		msg="Escolha o tipo de tempo da idade!"
+				     	}else{
+				     		if(StringUtil.trim(TInumeroID.text)==""){
+				     			msg="Digite o número do paciente!"
+				     		}
+				     	
+				     	}
+				     }
+				     
+				    }
+				   }
+				  }
+				 }
+				}
+				
+				return msg;
+		}
+		
+		protected function CBestadoEscolha(evt:DropdownEvent):void{
+				estadoEscolhido = ComboBox(evt.target).selectedItem.label;
+				
+		}
+		protected function CBsemanaEscolha(evt:DropdownEvent):void{
+				semanaEscolhido = ComboBox(evt.target).selectedItem.label;
+				
+		}
+		protected function dataformatar(dt:String):String{
+			var st:String=dt.substr(6,4)+dt.substr(3,2)+dt.substr(0,2);//yyyymmdd
+			return st;
+		
+		}
+		protected function horaformatar(hr:String):String{
+			var ht:String= hr.substr(0,2)+hr.substr(3,2)+"00";
+			return ht;
+		}
+		protected function sexoEscolhido():String{
+			if(CBsexoM.selected){
+				return CBsexoM.label;
+				
+			}else{
+				if(CBsexoF.selected){
+					return CBsexoF.label;
+				}else{
+					if(CBsexoI.selected){
+						return CBsexoI.label;
+					}else{
+						return null;
+					}
+				}
+			
+			}
+		}
+		protected function tempIdadeEscolhido():String{
+			if(CBidadehora.selected){
+				return CBidadehora.label;
+			}else{	
+				if(CBidadedia.selected){
+					return CBidadedia.label;
+				}else{
+					if(CBidademes.selected){
+						return CBidademes.label;
+					}else{
+						if(CBidadeano.selected){
+							return CBidadeano.label;
+						}else{
+							return null;
+						}
+					}
+				}
+			}	
+		}
+		
+		protected function gestanteEscolhido():String{
+			if(CBgestNao.selected){
+				return CBgestNao.label;
+			}else{	
+				if(CBgesignorado.selected){
+					return CBgesignorado.label;
+				}else{
+					if(CBgestAplica.selected){
+						return CBgestAplica.label;
+					}else{
+						return null;						
+					}
+				}
+			}
+		}
+		
+		protected function gestanteTempoEscolhido():String{
+			if(CBtrim1.selected){
+				return CBtrim1.label;
+			}else{	
+				if(CBtrim2.selected){
+					return CBtrim2.label;
+				}else{
+					if(CBtrim3.selected){
+						return CBtrim3.label;
+					}else{
+						if(CBtrim4.selected){
+							return CBtrim4.label;
+						}else{
+							return null;
+						}
+					}
+				}
+			}	
+		}
+		
+		protected function vitimaEscolhido():String{
+			if(CBhumana.selected){
+				return CBhumana.label;
+			}else{	
+				if(CBanimal.selected){
+					return CBanimal.label;
+				}else{
+					if(CBinformacao.selected){
+						return CBinformacao.label;
+					}else{
+						return null;						
+					}
+				}
+			}
+		}
+		
+		protected function BTproximo():void{
+			///*
+				if(CampoEmBranco()==""){// retorna "" se não existir campos obrigatorios em branco
+					
+					if(Volta){
+						cadpaci.UpdateBancoP(IDpacientBanco,TInomepaciente.text, sexoEscolhido(), TIidade.text, tempIdadeEscolhido(),TIpeso.text, TIddd.text,TItelefone.text,TIespecie.text,
+						 gestanteEscolhido(),TIprofissao.text,gestanteTempoEscolhido(),estadoEscolhido,TImunicipio.text,TIbairro.text,TIendereco.text,TInumero.text,vitimaEscolhido(),TIcentro.text,
+						 TInumeroID.text,dataformatar(DFdata.text),semanaEscolhido,horaformatar(TIhoraID.text));
+					}else{				
+						cadpaci.InsertBancoP(TInomepaciente.text, sexoEscolhido(), TIidade.text, tempIdadeEscolhido(),TIpeso.text, TIddd.text,TItelefone.text,TIespecie.text,
+						 gestanteEscolhido(),TIprofissao.text,gestanteTempoEscolhido(),estadoEscolhido,TImunicipio.text,TIbairro.text,TIendereco.text,TInumero.text,vitimaEscolhido(),TIcentro.text,
+						 TInumeroID.text,dataformatar(DFdata.text),semanaEscolhido,horaformatar(TIhoraID.text),UsuarioLogin);
+	 				}
+					
+				}else{
+					Alert.show(CampoEmBranco());
+				}
+				//*/
+				//Alert.show(vitimaEscolhido());
+				
+				
+		}
+	
+            
+            
+				
+				]]>
+	</mx:Script>	
+	
+	
+	
+
+<mx:Panel horizontalScrollPolicy="auto" verticalScrollPolicy="auto" id="PNmain" horizontalCenter="0" verticalCenter="0" width="96%" height="90%" layout="absolute">
+	<mx:Panel width="1300" height="690" layout="absolute" backgroundColor="#E9F4F6" borderColor="#B7CCD0" id="PNpaciente" title="Paciente" fontFamily="Times New Roman" fontSize="16" horizontalScrollPolicy="off" verticalScrollPolicy="off" left="0" top="0">
+		<mx:Label text="Nome*:" id="LBnomepaciente" fontFamily="Times New Roman" fontSize="16" width="66" left="10" top="10" height="25"/>
+		<mx:TextInput width="737" id="TInomepaciente" fontFamily="Times New Roman" fontSize="16" top="10" left="84" height="29"/>
+		<mx:Label text="Espécie (se animal):" id="LBespecie" fontFamily="Times New Roman" fontSize="16" right="373" width="150" top="112"/>
+		<mx:TextInput width="333" id="TIespecie" fontFamily="Times New Roman" fontSize="16" right="10" top="110" height="29"/>
+		<mx:Label text="Profissão/Ocupação*:" id="LBprofissao" fontFamily="Times New Roman" fontSize="16" right="368" width="150" top="150"/>
+		<mx:TextInput width="333" id="TIprofissao" fontFamily="Times New Roman" fontSize="16" right="10" top="148" height="29"/>
+		<mx:Label text="Endereço:" id="LBEndereco" fontFamily="Times New Roman" fontSize="16" top="279" left="10" width="76"/>
+		<mx:TextInput id="TIendereco" fontFamily="Times New Roman" fontSize="16" top="279" left="94" width="794" height="29"/>
+		<mx:Label text="Bairro:" id="LBBairro" fontFamily="Times New Roman" fontSize="16" top="230" right="256" width="87" height="25"/>
+		<mx:Label text="Estado*:" id="LBestado" fontFamily="Times New Roman" fontSize="16" left="10" width="66" top="230"/>
+		<mx:TextInput id="TIbairro" fontFamily="Times New Roman" fontSize="16" top="230" right="10" width="261" height="29"/>
+		<mx:TextInput id="TImunicipio" fontFamily="Times New Roman" fontSize="16" top="230" width="482" horizontalCenter="1" height="29"/>
+		<mx:Label text="Município*:" id="LBmunicipio" fontFamily="Times New Roman" fontSize="16" top="230" width="81" horizontalCenter="-288"/>
+		<mx:Label text="Telefone:" id="LBTelefone" fontFamily="Times New Roman" fontSize="16" width="73" top="110" left="10" height="25"/>
+		<mx:TextInput width="134" id="TItelefone" fontFamily="Times New Roman" fontSize="16" top="110" left="157" maxChars="9"/>
+		<mx:Label text="Idade*:" id="LBidade" fontFamily="Times New Roman" fontSize="16" left="10" width="52" top="60"/>
+		<mx:Label text="Centro:" id="LBCentro" fontFamily="Times New Roman" fontSize="16" left="10" width="76" verticalCenter="88" height="25"/>
+		<mx:Label text="Data:" id="LBdata" fontFamily="Times New Roman" fontSize="16" left="10" width="52" verticalCenter="127"/>
+		<mx:TextInput width="794" id="TIcentro" fontFamily="Times New Roman" fontSize="16" left="94" verticalCenter="88" height="29"/>
+		<mx:TextInput width="90" id="TIidade" fontFamily="Times New Roman" fontSize="16" top="60" left="70" height="29"/>
+		<mx:Label text="Peso:" id="LBpeso" fontFamily="Times New Roman" fontSize="16" right="368" width="50" top="62"/>
+		<mx:Label text="Kg" id="LBKg" fontFamily="Times New Roman" fontSize="16" right="151" width="28" top="62"/>
+		<mx:Label text="Sexo*:" id="LBSexo" fontFamily="Times New Roman" fontSize="16" right="368" width="50" top="10"/>
+		<mx:TextInput width="138" id="TIpeso" fontFamily="Times New Roman" fontSize="16" right="205" top="60" height="29"/>
+		<mx:Label text="Nº.:" id="LBnumero" fontFamily="Times New Roman" fontSize="16" width="57" right="286" height="25" top="279"/>
+		<mx:TextInput width="261" id="TInumero" fontFamily="Times New Roman" fontSize="16" right="10" top="279" height="29"/>
+		<mx:Label text="Semana:" id="LBsem" fontFamily="Times New Roman" fontSize="16" height="25" width="62" verticalCenter="127" horizontalCenter="-305"/>
+		<mx:Label text="Hora:" id="LBhoraID" fontFamily="Times New Roman" fontSize="16" height="25" verticalCenter="127" right="286" width="57"/>
+		<mx:Label text="Número*:" id="LBnumeroUnico" fontFamily="Times New Roman" fontSize="16" width="87" right="256" height="25" verticalCenter="88"/>
+		<mx:TextInput width="238" id="TInumeroID" fontFamily="Times New Roman" fontSize="16" right="10" verticalCenter="88" height="29"/>
+		<mx:TextInput width="50" id="TIddd" fontFamily="Times New Roman" fontSize="16" top="110" left="94" maxChars="2"/>
+		<mx:CheckBox label="Hora" id="CBidadehora" fontFamily="Times New Roman" fontSize="16" top="60" left="200" width="66" click="idade(0)"/>
+		<mx:CheckBox label="Dia" id="CBidadedia" fontFamily="Times New Roman" fontSize="16" top="60" left="285" width="55" click="idade(1)"/>
+		<mx:CheckBox label="Masculino" id="CBsexoM" fontFamily="Times New Roman" fontSize="16" width="87" right="256" top="10" click="sexo(0)"/>
+		<mx:CheckBox label="Feminino" id="CBsexoF" fontFamily="Times New Roman" fontSize="16" width="79" right="151" top="10" click="sexo(1)"/>
+		<mx:CheckBox label="Ignorado" id="CBsexoI" fontFamily="Times New Roman" fontSize="16" width="79" right="57" top="10" click="sexo(2)"/>
+		<mx:CheckBox label="Mês" id="CBidademes" fontFamily="Times New Roman" fontSize="16" top="60" width="52" left="357" click="idade(2)"/>
+		<mx:CheckBox label="Ano" id="CBidadeano" fontFamily="Times New Roman" fontSize="16" top="60" width="57" left="424" click="idade(3)"/>
+		<mx:Label text="Gestante (Tempo):" id="LBgestanteTemp" fontFamily="Times New Roman" fontSize="16" width="126" top="190" left="10" height="25"/>
+		<mx:Label text="Gestante :" id="LBgestante" fontFamily="Times New Roman" fontSize="16" left="10" width="66" top="150"/>
+		<mx:CheckBox label="1º trim" id="CBtrim1" fontFamily="Times New Roman" fontSize="16" top="190" left="169" width="70" click="gestanteTempo(0)"/>
+		<mx:CheckBox id="CBtrim2" fontFamily="Times New Roman" fontSize="16" label="2º trim" top="190" left="279" width="70" click="gestanteTempo(1)"/>
+		<mx:CheckBox label="3º trim" id="CBtrim3" fontFamily="Times New Roman" fontSize="16" top="190" left="357" width="70" click="gestanteTempo(2)"/>
+		<mx:CheckBox label="Não" id="CBgestNao" fontFamily="Times New Roman" fontSize="16" top="150" left="123" width="62" click="gestante(0)"/>
+		<mx:CheckBox id="CBgestAplica" fontFamily="Times New Roman" fontSize="16" label="Não se aplica" top="150" left="306" width="143" height="29" click="gestante(2)"/>
+		<mx:Label text="Vítima :" id="LBvitima" fontFamily="Times New Roman" fontSize="16" left="10" width="7%" height="25" verticalCenter="48"/>
+		<mx:CheckBox label="Humana" id="CBhumana" fontFamily="Times New Roman" fontSize="16" left="70" width="80" verticalCenter="48" click="vitima(0)"/>
+		<mx:CheckBox id="CBinformacao" fontFamily="Times New Roman" fontSize="16" label="Informação" left="230" width="100" verticalCenter="48" click="vitima(2)"/>
+		<mx:CheckBox label="Animal" id="CBanimal" fontFamily="Times New Roman" fontSize="16" width="80" left="150" verticalCenter="48" click="vitima(1)"/>
+		<mx:CheckBox label="ignorado" id="CBgesignorado" fontFamily="Times New Roman" fontSize="16" top="150" width="98" left="193" height="29" click="gestante(1)"/>
+		<mx:CheckBox label="Trim. Desc." id="CBtrim4" fontFamily="Times New Roman" fontSize="16" top="190" left="467" width="103" click="gestanteTempo(3)"/>
+		<mx:ComboBox id="CBOXEstado" fontFamily="Times New Roman" fontSize="16" top="230" left="84" width="207" height="29" dataProvider="{estado}" close="CBestadoEscolha(event)"></mx:ComboBox>
+		<mx:ComboBox id="CBOXsemana" fontFamily="Times New Roman" fontSize="16" width="223" height="29" dataProvider="{semana}" close="CBsemanaEscolha(event)" horizontalCenter="-128" verticalCenter="127"></mx:ComboBox>
+		<mx:DateField left="70" width="160" id="DFdata" fontFamily="Times New Roman" fontSize="16" verticalCenter="127" height="29" dayNames="['D', 'S', 'T', 'Q', 'Q', 'S', 'S']" monthNames="['Janeiro', 'Fevereiro','Março', 'Abril', 'Maio','Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro','Dezembro']" formatString="DD/MM/YYYY" />
+			
+
+		<ns1:ButtonEnter label="Próximo" fontWeight="bold" id="BTnext" fillAlphas="[1.0, 1.0]" fillColors="[#B7CCD0, #333131, #767677, #767677]" horizontalCenter="0" verticalCenter="225" fontFamily="Times New Roman" fontSize="16" width="121" height="29" click="BTproximo()"/>
+		<mx:Label text="¹Campos com * são de preenchimento obrigatorio." fontFamily="Times New Roman" fontSize="16" id="LBobservacao" left="10" width="346" bottom="60"/>
+		<ns1:TextInputHora id="TIhoraID" width="238" height="29" right="10" verticalCenter="127"/>
+		
+	</mx:Panel>
+</mx:Panel>
+</mx:Canvas>
